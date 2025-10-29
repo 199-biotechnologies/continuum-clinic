@@ -1,6 +1,7 @@
 import { NextIntlClientProvider } from 'next-intl'
 import { getMessages } from 'next-intl/server'
 import { ThemeProvider } from '@/components/providers/theme-provider'
+import { StructuredData } from '@/components/structured-data'
 import { notFound } from 'next/navigation'
 import { locales } from '@/i18n/config'
 
@@ -26,6 +27,9 @@ export default async function LocaleLayout({
 
   return (
     <html lang={locale} suppressHydrationWarning>
+      <head>
+        <StructuredData />
+      </head>
       <body>
         <NextIntlClientProvider messages={messages}>
           <ThemeProvider
