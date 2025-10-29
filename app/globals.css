@@ -224,20 +224,12 @@
     transition: all 0.25s cubic-bezier(0.76, 0, 0.24, 1);
   }
 
-  /* Strong Glass Blur Effect - iOS/macOS Style */
-  .glass-blur {
-    /* CRITICAL: backdrop-filter requires a semi-transparent background (rgba) to work */
-    background: rgba(255, 255, 255, 0.7);
-    backdrop-filter: blur(40px) saturate(180%) brightness(1.05);
-    -webkit-backdrop-filter: blur(40px) saturate(180%) brightness(1.05);
-  }
-
-  /* Fallback for browsers without backdrop-filter */
-  @supports not (backdrop-filter: blur(40px)) {
-    .glass-blur {
-      background: rgba(255, 255, 255, 0.92) !important;
-    }
-  }
+  /*
+   * Glass blur effect now uses Tailwind v4 built-in utilities:
+   * - backdrop-blur-lg: applies the blur filter
+   * - bg-white/70: provides the semi-transparent background required for blur to work
+   * - No custom CSS needed - Tailwind v4 has everything built-in
+   */
 
   /* Dropdown glass effect */
   .liquid-glass-dropdown {
