@@ -3,6 +3,7 @@ import { Header } from '@/components/layout/header'
 import { Footer } from '@/components/layout/footer'
 import { Section } from '@/components/layout/section'
 import { Container } from '@/components/layout/container'
+import { ContactForm } from '@/components/contact-form'
 import { SITE_CONFIG } from '@/lib/constants'
 
 export default function ContactPage() {
@@ -17,7 +18,7 @@ export default function ContactPage() {
           <Container size="narrow">
             <h1 className="text-center mb-12">{t('contact_title')}</h1>
 
-            <div className="grid gap-8 md:grid-cols-2 mb-12">
+            <div className="grid gap-12 md:grid-cols-2 mb-12">
               <div>
                 <h3 className="mb-4">Contact</h3>
                 <div className="space-y-2 text-sm font-extralight text-muted-foreground">
@@ -29,10 +30,8 @@ export default function ContactPage() {
               </div>
 
               <div>
-                <h3 className="mb-4">Get in touch</h3>
-                <p className="text-sm font-extralight text-muted-foreground">
-                  Contact form coming soon. For now, please email us directly at {SITE_CONFIG.email}
-                </p>
+                <h3 className="mb-4">Send message</h3>
+                <ContactForm />
               </div>
             </div>
           </Container>

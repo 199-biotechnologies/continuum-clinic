@@ -214,73 +214,76 @@
   }
 }
 
-/* Liquid Glass Navigation - Apple-style with SVG filters */
+/* Liquid Glass Navigation - Pure CSS Apple-style (Safari-optimized) */
 .liquid-glass-nav {
   position: relative;
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.08) 0%,
-    rgba(255, 255, 255, 0.04) 100%
-  );
-  backdrop-filter: blur(20px) saturate(180%) brightness(105%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%) brightness(105%);
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   box-shadow:
-    0 8px 32px 0 rgba(0, 0, 0, 0.12),
-    inset 0 1px 1px 0 rgba(255, 255, 255, 0.15),
-    inset 0 -1px 1px 0 rgba(0, 0, 0, 0.05);
-  filter: url(#liquid-glass);
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    0 8px 32px rgba(0, 0, 0, 0.1),
+    inset 0 1px 2px rgba(255, 255, 255, 0.3);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.liquid-glass-nav::before {
+.liquid-glass-nav::after {
   content: '';
   position: absolute;
-  inset: 0;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.05);
   border-radius: inherit;
-  background: url(#frost-noise);
+  backdrop-filter: blur(0.5px);
+  box-shadow:
+    inset -8px -6px 0px -9px rgba(255, 255, 255, 0.7),
+    inset 0px -8px 0px -7px rgba(255, 255, 255, 0.5);
   opacity: 0.4;
-  mix-blend-mode: overlay;
+  z-index: -1;
+  filter: blur(0.5px) brightness(108%);
   pointer-events: none;
 }
 
 .liquid-glass-nav:hover {
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.12) 0%,
-    rgba(255, 255, 255, 0.06) 100%
-  );
-  border-color: rgba(255, 255, 255, 0.24);
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(255, 255, 255, 0.25);
   box-shadow:
-    0 12px 48px 0 rgba(0, 0, 0, 0.16),
-    inset 0 1px 1px 0 rgba(255, 255, 255, 0.2),
-    inset 0 -1px 1px 0 rgba(0, 0, 0, 0.08);
+    0 12px 48px rgba(0, 0, 0, 0.12),
+    inset 0 1px 2px rgba(255, 255, 255, 0.4);
 }
 
-/* Liquid Glass Dropdown */
+.liquid-glass-nav:hover::after {
+  opacity: 0.5;
+}
+
+/* Liquid Glass Dropdown - Safari-optimized */
 .liquid-glass-dropdown {
   position: relative;
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.1) 0%,
-    rgba(255, 255, 255, 0.06) 100%
-  );
-  backdrop-filter: blur(20px) saturate(180%) brightness(105%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%) brightness(105%);
+  background: rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
   box-shadow:
-    0 8px 32px 0 rgba(0, 0, 0, 0.15),
-    inset 0 1px 1px 0 rgba(255, 255, 255, 0.15),
-    inset 0 -1px 1px 0 rgba(0, 0, 0, 0.05);
-  filter: url(#liquid-glass);
+    0 8px 32px rgba(0, 0, 0, 0.12),
+    inset 0 1px 2px rgba(255, 255, 255, 0.3);
 }
 
-.liquid-glass-dropdown::before {
+.liquid-glass-dropdown::after {
   content: '';
   position: absolute;
-  inset: 0;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.06);
   border-radius: inherit;
-  background: url(#frost-noise);
-  opacity: 0.3;
-  mix-blend-mode: overlay;
+  backdrop-filter: blur(0.5px);
+  box-shadow:
+    inset -7px -5px 0px -8px rgba(255, 255, 255, 0.7),
+    inset 0px -6px 0px -5px rgba(255, 255, 255, 0.5);
+  opacity: 0.4;
+  z-index: -1;
+  filter: blur(0.5px) brightness(108%);
   pointer-events: none;
 }
