@@ -2,8 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import { ContactFormSubmission } from '@/types/communications'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { formatDistanceToNow } from 'date-fns'
 

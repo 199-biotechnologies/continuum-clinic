@@ -298,5 +298,14 @@
   "footer_description": "Veterinary longevity medicine. London.",
   "footer_copyright": "© 2025 Continuum Clinic",
   "footer_privacy": "Privacy Policy",
-  "footer_terms": "Terms of Service"
+  "footer_terms": "Terms of Service",
+
+  "blog_title": "Blog",
+  "blog_subtitle": "Latest news and insights about pet longevity",
+  "blog_featured": "Featured Posts",
+  "blog_all_posts": "All Posts",
+  "blog_no_posts": "No posts found",
+  "blog_related_posts": "Related Posts",
+  "blog_views": "views",
+  "blog_reading_time": "min read"
 }
