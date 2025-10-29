@@ -30,7 +30,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
   // Get related posts
   const relatedPosts = post.category
     ? (await getPostsByCategory(post.category, 4))
-        .filter((p: Post) => p.id !== post.id && p.status === 'published')
+        .filter((p): p is Post => p !== null && (p as Post).id !== post.id && (p as Post).status === 'published')
         .slice(0, 3)
     : []
 
