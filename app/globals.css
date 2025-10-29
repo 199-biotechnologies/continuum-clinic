@@ -226,6 +226,8 @@
 
   /* Strong Glass Blur Effect - iOS/macOS Style */
   .glass-blur {
+    /* CRITICAL: backdrop-filter requires a semi-transparent background (rgba) to work */
+    background: rgba(255, 255, 255, 0.7);
     backdrop-filter: blur(40px) saturate(180%) brightness(1.05);
     -webkit-backdrop-filter: blur(40px) saturate(180%) brightness(1.05);
   }
