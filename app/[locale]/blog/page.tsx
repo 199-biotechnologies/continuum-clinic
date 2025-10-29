@@ -1,4 +1,4 @@
-import { useTranslations } from 'next-intl'
+import { getTranslations } from 'next-intl/server'
 import Link from 'next/link'
 import { getPostsByLocale, getAllCategories } from '@/lib/redis'
 import { Post } from '@/types/content'
@@ -22,7 +22,7 @@ export default async function BlogPage({ params, searchParams }: BlogPageProps) 
   const { locale } = await params
   const { category, tag } = await searchParams
 
-  const t = useTranslations()
+  const t = await getTranslations({ locale })
 
   let allPosts = await getPostsByLocale(locale, 100)
 
