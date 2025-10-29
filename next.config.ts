@@ -47,10 +47,10 @@ const nextConfig: NextConfig = {
     ]
   },
 
-  // Enable experimental features
-  experimental: {
-    optimizeCss: true,
-  }
+  // Experimental features disabled for now
+  // experimental: {
+  //   optimizeCss: true,
+  // }
 }
 
 export default withNextIntl(nextConfig)
