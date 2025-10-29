@@ -1,9 +1,26 @@
 import { Resend } from 'resend'
+import { EmailTemplateVariables } from '@/types/communications'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
 const FROM_EMAIL = process.env.EMAIL_FROM || 'boris@199.clinic'
 const TO_EMAIL = process.env.EMAIL_TO || 'info@thecontinuumclinic.com'
+
+/**
+ * Replace template variables with actual values
+ */
+export function replaceVariables(template: string, data: EmailTemplateVariables): string {
+  let result = template
+
+  Object.entries(data).forEach(([key, value]) => {
+    if (value !== undefined) {
+      const regex = new RegExp(`{{${key}}}`, 'g')
+      result = result.replace(regex, value)
+    }
+  })
+
+  return result
+}
 
 interface ContactFormData {
   name: string
@@ -269,5 +286,125 @@ export async function sendHealthRecordNotification(
   } catch (error) {
     console.error('Failed to send health record notification:', error)
     throw new Error('Failed to send email')
+  }
+}
+
+/**
+ * Generic send email function with template support
+ */
+export async function sendEmail({
+  to,
+  subject,
+  body,
+  replyTo
+}: {
+  to: string | string[]
+  subject: string
+  body: string
+  replyTo?: string
+}) {
+  try {
+    const { error } = await resend.emails.send({
+      from: FROM_EMAIL,
+      to: Array.isArray(to) ? to : [to],
+      subject,
+      replyTo,
+      html: body
+    })
+
+    if (error) {
+      throw error
+    }
+
+    return { success: true }
+  } catch (error) {
+    console.error('Failed to send email:', error)
+    throw new Error('Failed to send email')
+  }
+}
+
+/**
+ * Send bulk email to multiple recipients
+ */
+export async function sendBulkEmail({
+  recipients,
+  subject,
+  body,
+  replyTo
+}: {
+  recipients: { email: string; name: string }[]
+  subject: string
+  body: string
+  replyTo?: string
+}) {
+  const results = []
+
+  for (const recipient of recipients) {
+    try {
+      const personalizedBody = replaceVariables(body, {
+        clientName: recipient.name
+      })
+
+      await sendEmail({
+        to: recipient.email,
+        subject,
+        body: personalizedBody,
+        replyTo
+      })
+
+      results.push({ email: recipient.email, success: true })
+    } catch (error) {
+      console.error(`Failed to send to ${recipient.email}:`, error)
+      results.push({ email: recipient.email, success: false, error })
+    }
+  }
+
+  return results
+}
+
+/**
+ * Send reply to contact form submission
+ */
+export async function sendContactReply({
+  to,
+  toName,
+  subject,
+  message
+}: {
+  to: string
+  toName: string
+  subject: string
+  message: string
+}) {
+  try {
+    const { error } = await resend.emails.send({
+      from: FROM_EMAIL,
+      to,
+      subject: `Re: ${subject}`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <p>Dear ${toName},</p>
+
+          <div style="margin: 20px 0; white-space: pre-wrap;">${message}</div>
+
+          <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;" />
+
+          <p style="color: #666; font-size: 12px;">
+            Continuum Clinic<br />
+            12 Upper Wimpole Street, London W1G 6LW<br />
+            ${TO_EMAIL} | +44 20 1234 5678
+          </p>
+        </div>
+      `
+    })
+
+    if (error) {
+      throw error
+    }
+
+    return { success: true }
+  } catch (error) {
+    console.error('Failed to send contact reply:', error)
+    throw new Error('Failed to send reply')
   }
 }

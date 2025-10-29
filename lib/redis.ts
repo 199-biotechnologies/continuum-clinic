@@ -140,6 +140,42 @@ export async function getAllPets() {
   return pets.filter(Boolean)
 }
 
+export async function deletePet(petId: string) {
+  const pet = await getPet(petId) as any
+  if (pet?.clientId) {
+    await redis.srem(`pets:client:${pet.clientId}`, petId)
+  }
+  await redis.srem('pets:index', petId)
+  return await redis.del(`pet:${petId}`)
+}
+
+/**
+ * Client deletion
+ */
+export async function deleteClient(clientId: string) {
+  // Delete all pets associated with this client
+  const petIds = await redis.smembers(`pets:client:${clientId}`) as string[]
+  await Promise.all(petIds.map(petId => deletePet(petId)))
+
+  // Delete client email mapping
+  const client = await getClient(clientId) as any
+  if (client?.email) {
+    await redis.del(`clients:email:${client.email}`)
+  }
+
+  // Delete client password
+  await redis.del(`client:${clientId}:password`)
+
+  // Delete appointments
+  await redis.del(`appointments:client:${clientId}`)
+
+  // Delete from index
+  await redis.srem('clients:index', clientId)
+
+  // Delete client data
+  return await redis.del(`client:${clientId}`)
+}
+
 /**
  * Health record management
  */
@@ -191,6 +227,31 @@ export async function getRecentAppointments(limit: number = 20) {
   return appointments.filter(Boolean)
 }
 
+export async function getAllAppointments() {
+  const appointmentIds = await redis.zrange('appointments:list', 0, -1, { rev: true })
+  const appointments = await Promise.all(
+    (appointmentIds as string[]).map(id => getAppointment(id))
+  )
+  return appointments.filter(Boolean)
+}
+
+export async function getClientAppointments(clientId: string) {
+  const appointmentIds = await redis.smembers(`appointments:client:${clientId}`)
+  const appointments = await Promise.all(
+    (appointmentIds as string[]).map(id => getAppointment(id))
+  )
+  return appointments.filter(Boolean)
+}
+
+export async function deleteAppointment(appointmentId: string) {
+  const appointment = await getAppointment(appointmentId) as any
+  if (appointment?.clientId) {
+    await redis.srem(`appointments:client:${appointment.clientId}`, appointmentId)
+  }
+  await redis.zrem('appointments:list', appointmentId)
+  return await redis.del(`appointment:${appointmentId}`)
+}
+
 /**
  * Content management (Blog posts)
  */
@@ -199,17 +260,164 @@ export async function getPost(postId: string) {
   return data || null
 }
 
-export async function setPost(postId: string, postData: any) {
-  await redis.set(`post:${postId}`, postData)
-  await redis.lpush('posts:list', postId)
+export async function getPostBySlug(slug: string, locale: string) {
+  const postId = await redis.get(`post:slug:${locale}:${slug}`)
+  if (!postId) return null
+  return await getPost(postId as string)
 }
 
-export async function getAllPosts(limit: number = 50) {
-  const postIds = await redis.lrange('posts:list', 0, limit - 1)
+export async function setPost(postId: string, postData: any) {
+  await redis.set(`post:${postId}`, postData)
+
+  // Add to posts list sorted by published date
+  const timestamp = postData.publishedAt ? new Date(postData.publishedAt).getTime() : Date.now()
+  await redis.zadd('posts:list', { score: timestamp, member: postId })
+
+  // Set slug mapping
+  await redis.set(`post:slug:${postData.locale}:${postData.slug}`, postId)
+
+  // Add to category index
+  if (postData.category) {
+    await redis.sadd(`posts:category:${postData.category}`, postId)
+  }
+
+  // Add to tag indexes
+  if (postData.tags && Array.isArray(postData.tags)) {
+    for (const tag of postData.tags) {
+      await redis.sadd(`posts:tag:${tag}`, postId)
+    }
+  }
+
+  // Add to locale index
+  await redis.sadd(`posts:locale:${postData.locale}`, postId)
+
+  // Add to status index
+  await redis.sadd(`posts:status:${postData.status}`, postId)
+}
+
+export async function deletePost(postId: string) {
+  const post = await getPost(postId)
+  if (!post) return
+
+  // Remove from all indexes
+  await redis.del(`post:${postId}`)
+  await redis.del(`post:slug:${post.locale}:${post.slug}`)
+  await redis.zrem('posts:list', postId)
+  await redis.srem(`posts:locale:${post.locale}`, postId)
+  await redis.srem(`posts:status:${post.status}`, postId)
+
+  if (post.category) {
+    await redis.srem(`posts:category:${post.category}`, postId)
+  }
+
+  if (post.tags && Array.isArray(post.tags)) {
+    for (const tag of post.tags) {
+      await redis.srem(`posts:tag:${tag}`, postId)
+    }
+  }
+}
+
+export async function getAllPosts(limit: number = 50, offset: number = 0) {
+  const postIds = await redis.zrange('posts:list', offset, offset + limit - 1, { rev: true })
   const posts = await Promise.all(
     (postIds as string[]).map(id => getPost(id))
   )
   return posts.filter(Boolean)
+}
+
+export async function getPostsByLocale(locale: string, limit: number = 50) {
+  const postIds = await redis.smembers(`posts:locale:${locale}`)
+  const posts = await Promise.all(
+    (postIds as string[]).slice(0, limit).map(id => getPost(id))
+  )
+  return posts.filter(Boolean).sort((a: any, b: any) =>
+    new Date(b.publishedAt || b.createdAt).getTime() - new Date(a.publishedAt || a.createdAt).getTime()
+  )
+}
+
+export async function getPostsByStatus(status: string, limit: number = 50) {
+  const postIds = await redis.smembers(`posts:status:${status}`)
+  const posts = await Promise.all(
+    (postIds as string[]).slice(0, limit).map(id => getPost(id))
+  )
+  return posts.filter(Boolean).sort((a: any, b: any) =>
+    new Date(b.publishedAt || b.createdAt).getTime() - new Date(a.publishedAt || a.createdAt).getTime()
+  )
+}
+
+export async function getPostsByCategory(category: string, limit: number = 50) {
+  const postIds = await redis.smembers(`posts:category:${category}`)
+  const posts = await Promise.all(
+    (postIds as string[]).slice(0, limit).map(id => getPost(id))
+  )
+  return posts.filter(Boolean).sort((a: any, b: any) =>
+    new Date(b.publishedAt || b.createdAt).getTime() - new Date(a.publishedAt || a.createdAt).getTime()
+  )
+}
+
+export async function getPostsByTag(tag: string, limit: number = 50) {
+  const postIds = await redis.smembers(`posts:tag:${tag}`)
+  const posts = await Promise.all(
+    (postIds as string[]).slice(0, limit).map(id => getPost(id))
+  )
+  return posts.filter(Boolean).sort((a: any, b: any) =>
+    new Date(b.publishedAt || b.createdAt).getTime() - new Date(a.publishedAt || a.createdAt).getTime()
+  )
+}
+
+export async function incrementPostViews(postId: string) {
+  const post = await getPost(postId)
+  if (!post) return
+
+  const updatedPost = { ...post, views: (post.views || 0) + 1 }
+  await redis.set(`post:${postId}`, updatedPost)
+  return updatedPost.views
+}
+
+/**
+ * Category management
+ */
+export async function getAllCategories() {
+  const keys = await redis.keys('posts:category:*')
+  const categories = (keys as string[]).map(key => key.replace('posts:category:', ''))
+  return categories.sort()
+}
+
+export async function addCategory(category: string) {
+  await redis.sadd('categories:list', category)
+}
+
+export async function deleteCategory(category: string) {
+  await redis.srem('categories:list', category)
+  await redis.del(`posts:category:${category}`)
+}
+
+export async function getCategoriesList() {
+  const categories = await redis.smembers('categories:list')
+  return (categories as string[]).sort()
+}
+
+/**
+ * Tag management
+ */
+export async function getAllTags() {
+  const keys = await redis.keys('posts:tag:*')
+  const tags = (keys as string[]).map(key => key.replace('posts:tag:', ''))
+  return tags.sort()
+}
+
+export async function addTag(tag: string) {
+  await redis.sadd('tags:list', tag)
+}
+
+export async function deleteTag(tag: string) {
+  await redis.srem('tags:list', tag)
+  await redis.del(`posts:tag:${tag}`)
+}
+
+export async function getTagsList() {
+  const tags = await redis.smembers('tags:list')
+  return (tags as string[]).sort()
 }
 
 /**
@@ -260,4 +468,121 @@ export async function checkRateLimit(key: string, limit: number, windowSeconds: 
     await redis.expire(`ratelimit:${key}`, windowSeconds)
   }
   return (current as number) <= limit
+}
+
+/**
+ * Contact Form Submissions
+ */
+export async function saveContactSubmission(contactId: string, data: any) {
+  await redis.set(`contact:${contactId}`, data)
+  await redis.zadd('contacts:list', {
+    score: new Date(data.submittedAt).getTime(),
+    member: contactId
+  })
+  await redis.sadd(`contacts:status:${data.status}`, contactId)
+}
+
+export async function getContactSubmission(contactId: string) {
+  return await redis.get(`contact:${contactId}`)
+}
+
+export async function updateContactStatus(contactId: string, newStatus: string, oldStatus?: string) {
+  const contact = await getContactSubmission(contactId)
+  if (!contact) return null
+
+  const updated = { ...contact, status: newStatus }
+
+  if (newStatus === 'read' && !updated.readAt) {
+    updated.readAt = new Date().toISOString()
+  }
+  if (newStatus === 'replied' && !updated.repliedAt) {
+    updated.repliedAt = new Date().toISOString()
+  }
+
+  await redis.set(`contact:${contactId}`, updated)
+
+  if (oldStatus) {
+    await redis.srem(`contacts:status:${oldStatus}`, contactId)
+  }
+  await redis.sadd(`contacts:status:${newStatus}`, contactId)
+
+  return updated
+}
+
+export async function getContactsByStatus(status: string, limit: number = 50) {
+  const contactIds = await redis.smembers(`contacts:status:${status}`)
+  const contacts = await Promise.all(
+    (contactIds as string[]).slice(0, limit).map(id => getContactSubmission(id))
+  )
+  return contacts.filter(Boolean)
+}
+
+export async function getAllContacts(limit: number = 100) {
+  const contactIds = await redis.zrange('contacts:list', 0, limit - 1, { rev: true })
+  const contacts = await Promise.all(
+    (contactIds as string[]).map(id => getContactSubmission(id))
+  )
+  return contacts.filter(Boolean)
+}
+
+export async function deleteContactSubmission(contactId: string) {
+  const contact = await getContactSubmission(contactId)
+  if (!contact) return false
+
+  await redis.del(`contact:${contactId}`)
+  await redis.zrem('contacts:list', contactId)
+  await redis.srem(`contacts:status:${(contact as any).status}`, contactId)
+
+  return true
+}
+
+/**
+ * Email Templates
+ */
+export async function saveTemplate(templateId: string, data: any) {
+  await redis.set(`template:${templateId}`, data)
+  await redis.sadd('templates:list', templateId)
+}
+
+export async function getTemplate(templateId: string) {
+  return await redis.get(`template:${templateId}`)
+}
+
+export async function getAllTemplates() {
+  const templateIds = await redis.smembers('templates:list')
+  const templates = await Promise.all(
+    (templateIds as string[]).map(id => getTemplate(id))
+  )
+  return templates.filter(Boolean)
+}
+
+export async function deleteTemplate(templateId: string) {
+  const template = await getTemplate(templateId)
+  if (!template || (template as any).isSystem) {
+    return false
+  }
+
+  await redis.del(`template:${templateId}`)
+  await redis.srem('templates:list', templateId)
+
+  return true
+}
+
+/**
+ * Notification Settings
+ */
+export async function getNotificationSettings() {
+  const settings = await redis.get('notification:settings')
+  return settings || {
+    sendAppointmentConfirmation: true,
+    sendReminders: true,
+    sendWelcomeEmail: true,
+    sendMonthlyNewsletter: false,
+    replyToEmail: 'info@thecontinuumclinic.com',
+    emailFooter: 'Continuum Clinic\n12 Upper Wimpole Street, London W1G 6LW\ninfo@thecontinuumclinic.com | +44 20 1234 5678'
+  }
+}
+
+export async function saveNotificationSettings(settings: any) {
+  return await redis.set('notification:settings', settings)
 }

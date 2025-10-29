@@ -19,6 +19,8 @@ export interface Post {
   publishedAt?: string
   createdAt: string
   updatedAt: string
+  views: number
+  readingTime: number
   seo?: {
     metaTitle?: string
     metaDescription?: string

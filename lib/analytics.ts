@@ -1,125 +1,315 @@
-import { incrementPageView, incrementLLMVisit } from './redis'
+import { redis } from './redis'
 
 /**
- * Track page view
+ * Enhanced Analytics Functions
+ * Full implementation of the analytics schema for tracking
  */
-export async function trackPageView(path: string) {
-  const today = new Date().toISOString().split('T')[0]
-  await incrementPageView(path, today)
-}
 
 /**
- * Detect and track LLM traffic (ChatGPT, Claude, Perplexity, etc.)
+ * Traffic Source Tracking
  */
-export function detectLLMBot(userAgent: string): string | null {
-  const ua = userAgent.toLowerCase()
-
-  // ChatGPT
-  if (ua.includes('chatgpt') || ua.includes('gpt-')) {
-    return 'chatgpt'
-  }
-
-  // Claude
-  if (ua.includes('claude') || ua.includes('anthropic')) {
-    return 'claude'
-  }
-
-  // Perplexity
-  if (ua.includes('perplexity')) {
-    return 'perplexity'
-  }
-
-  // Google Bard/Gemini
-  if (ua.includes('bard') || ua.includes('gemini')) {
-    return 'gemini'
-  }
-
-  // Other search crawlers
-  if (ua.includes('googlebot')) return 'googlebot'
-  if (ua.includes('bingbot')) return 'bingbot'
-
-  return null
+export async function incrementTrafficSource(source: string, date: string) {
+  return await redis.incr(`analytics:source:${source}:${date}`)
 }
 
 /**
- * Track LLM visit
+ * Session Management
  */
-export async function trackLLMVisit(userAgent: string) {
-  const bot = detectLLMBot(userAgent)
-  if (!bot) return
+export async function trackSession(sessionId: string, data: {
+  startTime: string
+  pages: string[]
+  userAgent?: string
+  lastActivity?: string
+}) {
+  return await redis.set(`analytics:sessions:${sessionId}`, data, { ex: 1800 }) // 30 min TTL
+}
 
-  const today = new Date().toISOString().split('T')[0]
-  await incrementLLMVisit(bot, today)
+export async function getAnalyticsSession(sessionId: string) {
+  return await redis.get(`analytics:sessions:${sessionId}`)
+}
+
+export async function updateSessionActivity(sessionId: string, page: string) {
+  const session = await getAnalyticsSession(sessionId) as any
+  if (session) {
+    session.pages.push(page)
+    session.lastActivity = new Date().toISOString()
+    await trackSession(sessionId, session)
+  }
+  return session
 }
 
 /**
- * Get web vitals score
+ * Conversion Tracking
  */
-export interface WebVitals {
-  name: 'CLS' | 'FCP' | 'FID' | 'LCP' | 'TTFB' | 'INP'
-  value: number
-  rating: 'good' | 'needs-improvement' | 'poor'
-}
-
-export function analyzeWebVitals(metric: WebVitals): {
-  isGood: boolean
-  threshold: number
-} {
-  const thresholds = {
-    CLS: { good: 0.1, poor: 0.25 },
-    FCP: { good: 1800, poor: 3000 },
-    FID: { good: 100, poor: 300 },
-    LCP: { good: 2500, poor: 4000 },
-    TTFB: { good: 800, poor: 1800 },
-    INP: { good: 200, poor: 500 }
-  }
-
-  const threshold = thresholds[metric.name]
-  const isGood = metric.value <= threshold.good
-
-  return {
-    isGood,
-    threshold: threshold.good
-  }
+export async function incrementConversion(type: string, date: string) {
+  return await redis.incr(`analytics:conversions:${type}:${date}`)
 }
 
 /**
- * Format analytics data for dashboard
+ * Date Range Analytics
  */
-export interface AnalyticsData {
-  pageViews: Record<string, number>
-  llmVisits: Record<string, number>
-  totalViews: number
-  topPages: Array<{ path: string; views: number }>
+
+// Helper to generate date range
+function getDateRange(startDate: string, endDate: string): string[] {
+  const dates: string[] = []
+  const current = new Date(startDate)
+  const end = new Date(endDate)
+
+  while (current <= end) {
+    dates.push(current.toISOString().split('T')[0])
+    current.setDate(current.getDate() + 1)
+  }
+
+  return dates
 }
 
-export function formatAnalyticsData(rawData: Array<{ key: string; value: any }>): AnalyticsData {
-  const pageViews: Record<string, number> = {}
-  const llmVisits: Record<string, number> = {}
-  let totalViews = 0
+// Get page views for a date range
+export async function getPageViewsRange(startDate: string, endDate: string) {
+  const dates = getDateRange(startDate, endDate)
+  const results: Record<string, Record<string, number>> = {}
 
-  for (const item of rawData) {
-    const value = typeof item.value === 'string' ? parseInt(item.value) : item.value
+  for (const date of dates) {
+    const pattern = `analytics:views:${date}:*`
+    const keys = await redis.keys(pattern)
+    const dateViews: Record<string, number> = {}
 
-    if (item.key.startsWith('analytics:views:')) {
-      const path = item.key.split(':').slice(3).join(':')
-      pageViews[path] = (pageViews[path] || 0) + value
-      totalViews += value
-    } else if (item.key.startsWith('analytics:llm:')) {
-      const bot = item.key.split(':')[2]
-      llmVisits[bot] = (llmVisits[bot] || 0) + value
+    for (const key of keys as string[]) {
+      const path = key.split(':').slice(3).join(':')
+      const count = await redis.get(key) as number
+      dateViews[path] = count || 0
     }
+
+    results[date] = dateViews
   }
 
-  const topPages = Object.entries(pageViews)
-    .map(([path, views]) => ({ path, views }))
-    .sort((a, b) => b.views - a.views)
+  return results
+}
+
+// Get AI bot traffic for date range
+export async function getAIBotTrafficRange(startDate: string, endDate: string) {
+  const dates = getDateRange(startDate, endDate)
+  const results: Record<string, Record<string, number>> = {}
+
+  for (const date of dates) {
+    const pattern = `analytics:llm:*:${date}`
+    const keys = await redis.keys(pattern)
+    const dateBots: Record<string, number> = {}
+
+    for (const key of keys as string[]) {
+      const bot = key.split(':')[2]
+      const count = await redis.get(key) as number
+      dateBots[bot] = count || 0
+    }
+
+    results[date] = dateBots
+  }
+
+  return results
+}
+
+// Get traffic sources for date range
+export async function getTrafficSourcesRange(startDate: string, endDate: string) {
+  const dates = getDateRange(startDate, endDate)
+  const results: Record<string, Record<string, number>> = {}
+
+  for (const date of dates) {
+    const pattern = `analytics:source:*:${date}`
+    const keys = await redis.keys(pattern)
+    const dateSources: Record<string, number> = {}
+
+    for (const key of keys as string[]) {
+      const source = key.split(':')[2]
+      const count = await redis.get(key) as number
+      dateSources[source] = count || 0
+    }
+
+    results[date] = dateSources
+  }
+
+  return results
+}
+
+// Get conversions for date range
+export async function getConversionsRange(startDate: string, endDate: string) {
+  const dates = getDateRange(startDate, endDate)
+  const results: Record<string, Record<string, number>> = {}
+
+  for (const date of dates) {
+    const pattern = `analytics:conversions:*:${date}`
+    const keys = await redis.keys(pattern)
+    const dateConversions: Record<string, number> = {}
+
+    for (const key of keys as string[]) {
+      const type = key.split(':')[2]
+      const count = await redis.get(key) as number
+      dateConversions[type] = count || 0
+    }
+
+    results[date] = dateConversions
+  }
+
+  return results
+}
+
+/**
+ * Analytics Summary for Dashboard
+ */
+export async function getAnalyticsSummary(days: number = 30) {
+  const endDate = new Date()
+  const startDate = new Date()
+  startDate.setDate(startDate.getDate() - days)
+
+  const startDateStr = startDate.toISOString().split('T')[0]
+  const endDateStr = endDate.toISOString().split('T')[0]
+
+  const [pageViews, aiBots, sources, conversions] = await Promise.all([
+    getPageViewsRange(startDateStr, endDateStr),
+    getAIBotTrafficRange(startDateStr, endDateStr),
+    getTrafficSourcesRange(startDateStr, endDateStr),
+    getConversionsRange(startDateStr, endDateStr)
+  ])
+
+  // Calculate totals
+  let totalPageViews = 0
+  const topPages: Record<string, number> = {}
+
+  Object.values(pageViews).forEach(dayData => {
+    Object.entries(dayData).forEach(([path, count]) => {
+      totalPageViews += count
+      topPages[path] = (topPages[path] || 0) + count
+    })
+  })
+
+  // AI bot totals
+  const aiBotTotals: Record<string, number> = {}
+  Object.values(aiBots).forEach(dayData => {
+    Object.entries(dayData).forEach(([bot, count]) => {
+      aiBotTotals[bot] = (aiBotTotals[bot] || 0) + count
+    })
+  })
+
+  // Traffic source totals
+  const sourceTotals: Record<string, number> = {}
+  Object.values(sources).forEach(dayData => {
+    Object.entries(dayData).forEach(([source, count]) => {
+      sourceTotals[source] = (sourceTotals[source] || 0) + count
+    })
+  })
+
+  // Conversion totals
+  const conversionTotals: Record<string, number> = {}
+  Object.values(conversions).forEach(dayData => {
+    Object.entries(dayData).forEach(([type, count]) => {
+      conversionTotals[type] = (conversionTotals[type] || 0) + count
+    })
+  })
+
+  // Calculate daily traffic
+  const dailyTraffic: { date: string; views: number }[] = []
+  Object.entries(pageViews).forEach(([date, dayData]) => {
+    const totalViews = Object.values(dayData).reduce((sum, count) => sum + count, 0)
+    dailyTraffic.push({ date, views: totalViews })
+  })
+
+  // Sort top pages
+  const topPagesSorted = Object.entries(topPages)
+    .sort(([, a], [, b]) => b - a)
     .slice(0, 10)
+    .map(([path, views]) => ({ path, views }))
 
   return {
-    pageViews,
-    llmVisits,
-    totalViews,
-    topPages
+    totalPageViews,
+    topPages: topPagesSorted,
+    aiBotTotals,
+    sourceTotals,
+    conversionTotals,
+    dailyTraffic: dailyTraffic.sort((a, b) => a.date.localeCompare(b.date))
   }
+}
+
+/**
+ * SEO Management
+ */
+
+// Store keyword data
+export async function setKeywordData(keyword: string, data: {
+  position?: number
+  clicks: number
+  impressions: number
+  ctr: number
+}) {
+  return await redis.set(`seo:keywords:${keyword}`, data)
+}
+
+export async function getKeywordData(keyword: string) {
+  return await redis.get(`seo:keywords:${keyword}`)
+}
+
+export async function getAllKeywords() {
+  const pattern = 'seo:keywords:*'
+  const keys = await redis.keys(pattern)
+  const keywords = await Promise.all(
+    (keys as string[]).map(async key => ({
+      keyword: key.split(':')[2],
+      data: await redis.get(key)
+    }))
+  )
+  return keywords
+}
+
+// SEO issues tracking
+export async function addSEOIssue(type: string, path: string) {
+  return await redis.sadd(`seo:issues:${type}`, path)
+}
+
+export async function getSEOIssues(type: string) {
+  return await redis.smembers(`seo:issues:${type}`)
+}
+
+export async function removeSEOIssue(type: string, path: string) {
+  return await redis.srem(`seo:issues:${type}`, path)
+}
+
+// Backlinks count
+export async function setBacklinksCount(count: number) {
+  return await redis.set('seo:backlinks:count', count)
+}
+
+export async function getBacklinksCount() {
+  return await redis.get('seo:backlinks:count') || 0
+}
+
+// Meta tags storage
+export async function setPageMeta(path: string, meta: {
+  title?: string
+  description?: string
+  keywords?: string[]
+  ogImage?: string
+}) {
+  return await redis.set(`seo:meta:${path}`, meta)
+}
+
+export async function getPageMeta(path: string) {
+  return await redis.get(`seo:meta:${path}`)
+}
+
+export async function getAllPageMeta() {
+  const pattern = 'seo:meta:*'
+  const keys = await redis.keys(pattern)
+  const metaData = await Promise.all(
+    (keys as string[]).map(async key => ({
+      path: key.split(':').slice(2).join(':'),
+      meta: await redis.get(key)
+    }))
+  )
+  return metaData
+}
+
+// Robots.txt storage
+export async function setRobotsTxt(content: string) {
+  return await redis.set('seo:robots:txt', content)
+}
+
+export async function getRobotsTxt() {
+  return await redis.get('seo:robots:txt') as string | null
 }

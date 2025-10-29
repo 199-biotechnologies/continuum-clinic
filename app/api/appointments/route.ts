@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { Resend } from 'resend'
 import { z } from 'zod'
+import { incrementConversion } from '@/lib/analytics'
 
 const appointmentSchema = z.object({
   ownerName: z.string().min(2, 'Name must be at least 2 characters'),
@@ -17,6 +18,10 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
     const data = appointmentSchema.parse(body)
+
+    // Track conversion
+    const today = new Date().toISOString().split('T')[0]
+    await incrementConversion('consultation', today)
 
     const resend = new Resend(process.env.RESEND_API_KEY)
 

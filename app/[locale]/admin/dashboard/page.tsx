@@ -1,153 +1,203 @@
 import { requireAdminAuth } from '@/lib/auth-helpers'
-import { getAllClients } from '@/lib/redis'
-import { redirect } from 'next/navigation'
+import { getAllClients, getAllPets, getRecentAppointments } from '@/lib/redis'
+import { AdminLayout } from '@/components/admin/admin-layout'
 import Link from 'next/link'
+import { Users, Dog, Calendar, TrendingUp, FileText, MessageSquare } from 'lucide-react'
 
 export default async function AdminDashboardPage() {
   const admin = await requireAdminAuth()
-
   const clients = await getAllClients()
+  const pets = await getAllPets()
+  const appointments = await getRecentAppointments(10)
 
-  async function handleLogout() {
-    'use server'
-    const { cookies } = await import('next/headers')
-    const cookieStore = await cookies()
-    cookieStore.delete('admin-token')
-    redirect('/admin')
-  }
+  // Calculate metrics
+  const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000
+  const monthAgo = Date.now() - 30 * 24 * 60 * 60 * 1000
+
+  const newClientsThisWeek = clients.filter((c: any) => {
+    if (!c || !c.createdAt) return false
+    return new Date(c.createdAt).getTime() > weekAgo
+  }).length
+
+  const newClientsThisMonth = clients.filter((c: any) => {
+    if (!c || !c.createdAt) return false
+    return new Date(c.createdAt).getTime() > monthAgo
+  }).length
+
+  const appointmentsThisWeek = appointments.filter((a: any) => {
+    if (!a || !a.date) return false
+    const appointmentDate = new Date(a.date).getTime()
+    const now = Date.now()
+    return appointmentDate > now && appointmentDate < now + 7 * 24 * 60 * 60 * 1000
+  }).length
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b border-border bg-card">
-        <div className="container mx-auto px-6 py-4 flex items-center justify-between">
-          <div>
-            <h1 className="text-xl font-light">Continuum Clinic Admin</h1>
-            <p className="text-sm font-extralight text-muted-foreground mt-1">
-              {admin.email}
-            </p>
-          </div>
-          <form action={handleLogout}>
-            <button
-              type="submit"
-              className="px-4 py-2 text-sm font-light border border-border rounded-md hover:bg-muted/10 transition-colors"
-            >
-              Logout
-            </button>
-          </form>
-        </div>
-      </header>
+    <div className="space-y-8">
+      {/* Metrics Grid */}
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+        <MetricCard
+          title="Total Clients"
+          value={clients.length}
+          icon={Users}
+          trend={`+${newClientsThisMonth} this month`}
+        />
+        <MetricCard
+          title="Active Pets"
+          value={pets.length}
+          icon={Dog}
+          trend="All registered"
+        />
+        <MetricCard
+          title="Appointments This Week"
+          value={appointmentsThisWeek}
+          icon={Calendar}
+          trend="Upcoming"
+        />
+        <MetricCard
+          title="New Clients This Month"
+          value={newClientsThisMonth}
+          icon={TrendingUp}
+          trend={`${newClientsThisWeek} this week`}
+        />
+      </div>
 
-      {/* Main Content */}
-      <main className="container mx-auto px-6 py-12">
-        {/* Stats Overview */}
-        <div className="grid gap-6 md:grid-cols-3 mb-12">
-          <div className="p-6 rounded-lg border border-border bg-card">
-            <p className="text-sm font-light text-muted-foreground">Total Clients</p>
-            <p className="text-3xl font-extralight mt-2">{clients.length}</p>
-          </div>
-          <div className="p-6 rounded-lg border border-border bg-card">
-            <p className="text-sm font-light text-muted-foreground">Active Today</p>
-            <p className="text-3xl font-extralight mt-2">0</p>
-          </div>
-          <div className="p-6 rounded-lg border border-border bg-card">
-            <p className="text-sm font-light text-muted-foreground">New This Week</p>
-            <p className="text-3xl font-extralight mt-2">
-              {clients.filter((c: any) => {
-                if (!c || !c.createdAt) return false
-                const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000
-                return new Date(c.createdAt).getTime() > weekAgo
-              }).length}
-            </p>
-          </div>
-        </div>
-
-        {/* Clients List */}
-        <div className="mb-12">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-light">Clients</h2>
+      {/* Recent Activity */}
+      <div className="grid gap-6 lg:grid-cols-2">
+        {/* Recent Appointments */}
+        <div className="border border-border rounded-lg bg-card p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-light">Recent Appointments</h2>
             <Link
-              href="/admin/clients/new"
-              className="px-4 py-2 text-sm font-light bg-foreground text-background rounded-md hover:opacity-90 transition-opacity"
+              href="/admin/appointments"
+              className="text-sm font-light text-muted-foreground hover:text-foreground"
             >
-              Add Client
+              View all
             </Link>
           </div>
-
-          {clients.length === 0 ? (
-            <div className="text-center py-16 border border-border rounded-lg">
-              <p className="text-lg font-extralight text-muted-foreground">
-                No clients yet
+          <div className="space-y-4">
+            {appointments.length === 0 ? (
+              <p className="text-sm font-extralight text-muted-foreground">
+                No appointments yet
               </p>
-              <p className="text-sm font-extralight text-muted-foreground mt-2">
-                Clients will appear here when they register through the portal
-              </p>
-            </div>
-          ) : (
-            <div className="border border-border rounded-lg overflow-hidden">
-              <table className="w-full">
-                <thead className="bg-muted/5 border-b border-border">
-                  <tr>
-                    <th className="text-left px-6 py-3 text-sm font-light">Name</th>
-                    <th className="text-left px-6 py-3 text-sm font-light">Email</th>
-                    <th className="text-left px-6 py-3 text-sm font-light">Phone</th>
-                    <th className="text-left px-6 py-3 text-sm font-light">Registered</th>
-                    <th className="text-left px-6 py-3 text-sm font-light">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {clients.filter((c): c is any => !!c).map((client) => (
-                    <tr key={client.id} className="border-b border-border last:border-0 hover:bg-muted/5 transition-colors">
-                      <td className="px-6 py-4 text-sm font-extralight">
-                        {client.firstName} {client.lastName}
-                      </td>
-                      <td className="px-6 py-4 text-sm font-extralight">
-                        {client.email}
-                      </td>
-                      <td className="px-6 py-4 text-sm font-extralight">
-                        {client.phone || '-'}
-                      </td>
-                      <td className="px-6 py-4 text-sm font-extralight">
-                        {new Date(client.createdAt).toLocaleDateString()}
-                      </td>
-                      <td className="px-6 py-4">
-                        <Link
-                          href={`/admin/clients/${client.id}`}
-                          className="text-sm font-light text-foreground hover:opacity-70 transition-opacity"
-                        >
-                          View
-                        </Link>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
+            ) : (
+              appointments.slice(0, 5).map((appointment: any) => (
+                <div key={appointment.id} className="flex items-start gap-4 pb-4 border-b border-border last:border-0 last:pb-0">
+                  <div className="w-10 h-10 rounded-full bg-muted/10 flex items-center justify-center flex-shrink-0">
+                    <Calendar className="w-5 h-5" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-light truncate">
+                      {appointment.clientName} - {appointment.petName}
+                    </p>
+                    <p className="text-xs font-extralight text-muted-foreground">
+                      {new Date(appointment.date).toLocaleDateString()} at {appointment.time}
+                    </p>
+                  </div>
+                  <span className={`text-xs px-2 py-1 rounded-full ${
+                    appointment.status === 'confirmed' ? 'bg-green-500/10 text-green-600 dark:text-green-400' :
+                    appointment.status === 'pending' ? 'bg-yellow-500/10 text-yellow-600 dark:text-yellow-400' :
+                    appointment.status === 'completed' ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400' :
+                    'bg-red-500/10 text-red-600 dark:text-red-400'
+                  }`}>
+                    {appointment.status}
+                  </span>
+                </div>
+              ))
+            )}
+          </div>
         </div>
 
-        {/* Quick Links */}
-        <div className="grid gap-4 md:grid-cols-2">
+        {/* New Clients */}
+        <div className="border border-border rounded-lg bg-card p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-light">New Clients</h2>
+            <Link
+              href="/admin/clients"
+              className="text-sm font-light text-muted-foreground hover:text-foreground"
+            >
+              View all
+            </Link>
+          </div>
+          <div className="space-y-4">
+            {clients.length === 0 ? (
+              <p className="text-sm font-extralight text-muted-foreground">
+                No clients yet
+              </p>
+            ) : (
+              clients
+                .filter((c: any) => c && c.createdAt)
+                .sort((a: any, b: any) =>
+                  new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+                )
+                .slice(0, 5)
+                .map((client: any) => (
+                  <div key={client.id} className="flex items-start gap-4 pb-4 border-b border-border last:border-0 last:pb-0">
+                    <div className="w-10 h-10 rounded-full bg-muted/10 flex items-center justify-center flex-shrink-0">
+                      <Users className="w-5 h-5" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-light truncate">
+                        {client.firstName} {client.lastName}
+                      </p>
+                      <p className="text-xs font-extralight text-muted-foreground truncate">
+                        {client.email}
+                      </p>
+                    </div>
+                    <p className="text-xs font-extralight text-muted-foreground">
+                      {new Date(client.createdAt).toLocaleDateString()}
+                    </p>
+                  </div>
+                ))
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Quick Actions */}
+      <div className="border border-border rounded-lg bg-card p-6">
+        <h2 className="text-lg font-light mb-4">Quick Actions</h2>
+        <div className="grid gap-4 md:grid-cols-3">
           <Link
-            href="/admin/appointments"
-            className="p-6 rounded-lg border border-border bg-card hover:bg-muted/5 transition-colors"
+            href="/admin/content/posts/new"
+            className="flex items-center gap-3 p-4 rounded-lg border border-border hover:bg-muted/5 transition-colors"
           >
-            <h3 className="text-lg font-light mb-2">Appointments</h3>
-            <p className="text-sm font-extralight text-muted-foreground">
-              View and manage all appointments
-            </p>
+            <FileText className="w-5 h-5" />
+            <span className="text-sm font-light">Create Blog Post</span>
+          </Link>
+          <Link
+            href="/admin/clients/new"
+            className="flex items-center gap-3 p-4 rounded-lg border border-border hover:bg-muted/5 transition-colors"
+          >
+            <Users className="w-5 h-5" />
+            <span className="text-sm font-light">Add Client</span>
           </Link>
           <Link
             href="/admin/analytics"
-            className="p-6 rounded-lg border border-border bg-card hover:bg-muted/5 transition-colors"
+            className="flex items-center gap-3 p-4 rounded-lg border border-border hover:bg-muted/5 transition-colors"
           >
-            <h3 className="text-lg font-light mb-2">Analytics</h3>
-            <p className="text-sm font-extralight text-muted-foreground">
-              View website analytics and metrics
-            </p>
+            <TrendingUp className="w-5 h-5" />
+            <span className="text-sm font-light">View Analytics</span>
           </Link>
         </div>
-      </main>
+      </div>
+    </div>
+  )
+}
+
+function MetricCard({ title, value, icon: Icon, trend }: {
+  title: string
+  value: number
+  icon: any
+  trend: string
+}) {
+  return (
+    <div className="p-6 rounded-lg border border-border bg-card">
+      <div className="flex items-center justify-between mb-2">
+        <p className="text-sm font-light text-muted-foreground">{title}</p>
+        <Icon className="w-5 h-5 text-muted-foreground" />
+      </div>
+      <p className="text-3xl font-extralight mb-1">{value}</p>
+      <p className="text-xs font-extralight text-muted-foreground">{trend}</p>
     </div>
   )
 }

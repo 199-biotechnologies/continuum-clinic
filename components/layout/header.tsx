@@ -31,17 +31,17 @@ export function Header() {
                 <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full opacity-0 transition-smooth group-hover:opacity-100 bg-gray-900" />
               </Link>
               <Link
+                href="/science"
+                className="hidden lg:block text-xs font-light tracking-[0.1em] uppercase transition-all duration-300 relative group text-gray-900 hover:text-gray-700"
+              >
+                {t('nav_science')}
+                <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full opacity-0 transition-smooth group-hover:opacity-100 bg-gray-900" />
+              </Link>
+              <Link
                 href="/services"
                 className="text-xs font-light tracking-[0.1em] uppercase transition-all duration-300 relative group whitespace-nowrap text-gray-900 hover:text-gray-700"
               >
                 {t('nav_services')}
-                <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full opacity-0 transition-smooth group-hover:opacity-100 bg-gray-900" />
-              </Link>
-              <Link
-                href="/blog"
-                className="hidden sm:block text-xs font-light tracking-[0.1em] uppercase transition-all duration-300 relative group whitespace-nowrap text-gray-900 hover:text-gray-700"
-              >
-                {t('nav_blog')}
                 <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full opacity-0 transition-smooth group-hover:opacity-100 bg-gray-900" />
               </Link>
               <Link
