@@ -116,23 +116,21 @@ export function ContactDetailClient({ contactId }: { contactId: string }) {
           <div>
             <div className="flex items-center gap-3 mb-2">
               <div className={`w-2 h-2 rounded-full ${statusColors[contact.status]}`} />
-              <Badge variant="outline" className="font-light">
+              <span className="px-2 py-1 text-xs font-light border rounded">
                 {typeLabels[contact.type]}
-              </Badge>
-              <Badge variant="secondary" className="font-light capitalize">
+              </span>
+              <span className="px-2 py-1 text-xs font-light bg-muted rounded capitalize">
                 {contact.status}
-              </Badge>
+              </span>
             </div>
             <h1 className="text-2xl font-light">{contact.subject}</h1>
           </div>
-          <Button
-            variant="outline"
-            size="sm"
+          <button
             onClick={handleArchive}
-            className="font-light"
+            className="px-4 py-2 text-sm font-light border rounded-md hover:border-foreground transition-colors"
           >
             Archive
-          </Button>
+          </button>
         </div>
 
         <div className="grid gap-4 md:grid-cols-2">
@@ -191,28 +189,27 @@ export function ContactDetailClient({ contactId }: { contactId: string }) {
       <div>
         <h3 className="font-light mb-4">Send Reply</h3>
         <div className="space-y-4">
-          <Textarea
+          <textarea
             value={replyMessage}
             onChange={(e) => setReplyMessage(e.target.value)}
             placeholder="Type your reply..."
             rows={8}
-            className="font-light"
+            className="w-full px-4 py-3 border rounded-md font-light focus:outline-none focus:ring-2 focus:ring-foreground"
           />
           <div className="flex gap-2">
-            <Button
+            <button
               onClick={handleReply}
               disabled={sending || !replyMessage.trim()}
-              className="font-light"
+              className="px-6 py-2 bg-foreground text-background rounded-md font-light disabled:opacity-50 hover:opacity-90 transition-opacity"
             >
               {sending ? 'Sending...' : 'Send Reply'}
-            </Button>
-            <Button
-              variant="outline"
+            </button>
+            <button
               onClick={() => setReplyMessage('')}
-              className="font-light"
+              className="px-6 py-2 border rounded-md font-light hover:border-foreground transition-colors"
             >
               Clear
-            </Button>
+            </button>
           </div>
         </div>
       </div>
