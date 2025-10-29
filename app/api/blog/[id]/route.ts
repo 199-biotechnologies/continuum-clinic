@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { getPost, setPost, deletePost } from '@/lib/redis'
 import { requireAdminAuth } from '@/lib/auth-helpers'
+import type { Post } from '@/types/content'
 
 const updateSchema = z.object({
   title: z.string().min(1).optional(),
@@ -31,17 +32,18 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    await requireAdminAuth()
     const { id } = await params
     const post = await getPost(id)
 
-    if (!post) {
+    if (!post || typeof post !== 'object' || !('id' in post)) {
       return NextResponse.json(
         { error: 'Post not found' },
         { status: 404 }
       )
     }
 
-    return NextResponse.json({ post })
+    return NextResponse.json({ post: post as Post })
   } catch (error) {
     console.error('Error fetching post:', error)
     return NextResponse.json(
@@ -57,28 +59,23 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const authResult = await requireAdminAuth(request)
-    if (!authResult.authenticated) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
-    }
+    await requireAdminAuth()
 
     const { id } = await params
-    const existingPost = await getPost(id)
+    const existing = await getPost(id)
 
-    if (!existingPost) {
+    if (!existing || typeof existing !== 'object' || !('id' in existing)) {
       return NextResponse.json(
         { error: 'Post not found' },
         { status: 404 }
       )
     }
 
+    const existingPost = existing as Post
     const body = await request.json()
     const validatedData = updateSchema.parse(body)
 
-    const updatedPost = {
+    const updatedPost: Post = {
       ...existingPost,
       ...validatedData,
       updatedAt: new Date().toISOString(),
@@ -116,18 +113,12 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const authResult = await requireAdminAuth(request)
-    if (!authResult.authenticated) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
-    }
+    await requireAdminAuth()
 
     const { id } = await params
     const post = await getPost(id)
 
-    if (!post) {
+    if (!post || typeof post !== 'object' || !('id' in post)) {
       return NextResponse.json(
         { error: 'Post not found' },
         { status: 404 }

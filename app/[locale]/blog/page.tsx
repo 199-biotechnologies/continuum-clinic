@@ -24,25 +24,25 @@ export default async function BlogPage({ params, searchParams }: BlogPageProps) 
 
   const t = useTranslations()
 
-  let posts = await getPostsByLocale(locale, 100)
+  let allPosts = await getPostsByLocale(locale, 100)
 
   // Filter only published posts
-  posts = posts.filter((post): post is Post => post !== null && (post as Post).status === 'published')
+  let posts: Post[] = allPosts.filter((post): post is Post => post !== null && (post as Post).status === 'published')
 
   // Apply filters
   if (category) {
-    posts = posts.filter(post => post.category === category)
+    posts = posts.filter((post) => post.category === category)
   }
 
   if (tag) {
-    posts = posts.filter(post => post.tags.includes(tag))
+    posts = posts.filter((post) => post.tags.includes(tag))
   }
 
   const categories = await getAllCategories()
 
   // Featured posts (first 3)
-  const featuredPosts = posts.slice(0, 3)
-  const otherPosts = posts.slice(3)
+  const featuredPosts: Post[] = posts.slice(0, 3)
+  const otherPosts: Post[] = posts.slice(3)
 
   return (
     <div className="flex min-h-screen flex-col">

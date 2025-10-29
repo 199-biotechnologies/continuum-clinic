@@ -10,8 +10,12 @@ const categorySchema = z.object({
 // GET - List all categories
 export async function GET() {
   try {
-    const categories = await getCategoriesList()
-    const categoriesWithCounts = await getAllCategories()
+    await requireAdminAuth()
+    const categoriesResult = await getCategoriesList()
+    const categoriesWithCountsResult = await getAllCategories()
+
+    const categories: string[] = Array.isArray(categoriesResult) ? categoriesResult : []
+    const categoriesWithCounts: string[] = Array.isArray(categoriesWithCountsResult) ? categoriesWithCountsResult : []
 
     return NextResponse.json({
       categories: categories.map(cat => ({
@@ -31,13 +35,7 @@ export async function GET() {
 // POST - Create category (admin only)
 export async function POST(request: NextRequest) {
   try {
-    const authResult = await requireAdminAuth(request)
-    if (!authResult.authenticated) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
-    }
+    await requireAdminAuth()
 
     const body = await request.json()
     const { name } = categorySchema.parse(body)

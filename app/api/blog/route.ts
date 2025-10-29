@@ -32,19 +32,29 @@ function calculateReadingTime(content: string): number {
 // GET - List all posts with filters
 export async function GET(request: NextRequest) {
   try {
+    await requireAdminAuth()
     const { searchParams } = new URL(request.url)
     const locale = searchParams.get('locale')
     const status = searchParams.get('status')
     const limit = parseInt(searchParams.get('limit') || '50')
 
-    let posts: any[]
+    const posts: Post[] = []
 
     if (locale) {
-      posts = await getPostsByLocale(locale, limit)
+      const result = await getPostsByLocale(locale, limit)
+      if (Array.isArray(result)) {
+        posts.push(...(result as Post[]))
+      }
     } else if (status) {
-      posts = await getPostsByStatus(status, limit)
+      const result = await getPostsByStatus(status, limit)
+      if (Array.isArray(result)) {
+        posts.push(...(result as Post[]))
+      }
     } else {
-      posts = await getAllPosts(limit)
+      const result = await getAllPosts(limit)
+      if (Array.isArray(result)) {
+        posts.push(...(result as Post[]))
+      }
     }
 
     return NextResponse.json({ posts })
@@ -60,14 +70,8 @@ export async function GET(request: NextRequest) {
 // POST - Create new post (admin only)
 export async function POST(request: NextRequest) {
   try {
+    await requireAdminAuth()
     // Verify admin authentication
-    const authResult = await requireAdminAuth(request)
-    if (!authResult.authenticated) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
-    }
 
     const body = await request.json()
     const validatedData = postSchema.parse(body)

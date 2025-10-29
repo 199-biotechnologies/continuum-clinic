@@ -1,4 +1,6 @@
 import { kv } from '@vercel/kv'
+import type { Post } from '@/types/content'
+import type { ContactFormSubmission } from '@/types/communications'
 
 /**
  * Redis KV Client
@@ -255,12 +257,12 @@ export async function deleteAppointment(appointmentId: string) {
 /**
  * Content management (Blog posts)
  */
-export async function getPost(postId: string) {
+export async function getPost(postId: string): Promise<Post | null> {
   const data = await redis.get(`post:${postId}`)
-  return data || null
+  return (data as Post) || null
 }
 
-export async function getPostBySlug(slug: string, locale: string) {
+export async function getPostBySlug(slug: string, locale: string): Promise<Post | null> {
   const postId = await redis.get(`post:slug:${locale}:${slug}`)
   if (!postId) return null
   return await getPost(postId as string)
@@ -299,19 +301,22 @@ export async function deletePost(postId: string) {
   const post = await getPost(postId)
   if (!post) return
 
+  // Ensure post is properly typed
+  const typedPost: Post = post
+
   // Remove from all indexes
   await redis.del(`post:${postId}`)
-  await redis.del(`post:slug:${post.locale}:${post.slug}`)
+  await redis.del(`post:slug:${typedPost.locale}:${typedPost.slug}`)
   await redis.zrem('posts:list', postId)
-  await redis.srem(`posts:locale:${post.locale}`, postId)
-  await redis.srem(`posts:status:${post.status}`, postId)
+  await redis.srem(`posts:locale:${typedPost.locale}`, postId)
+  await redis.srem(`posts:status:${typedPost.status}`, postId)
 
-  if (post.category) {
-    await redis.srem(`posts:category:${post.category}`, postId)
+  if (typedPost.category) {
+    await redis.srem(`posts:category:${typedPost.category}`, postId)
   }
 
-  if (post.tags && Array.isArray(post.tags)) {
-    for (const tag of post.tags) {
+  if (typedPost.tags && Array.isArray(typedPost.tags)) {
+    for (const tag of typedPost.tags) {
       await redis.srem(`posts:tag:${tag}`, postId)
     }
   }
@@ -488,9 +493,9 @@ export async function getContactSubmission(contactId: string) {
 
 export async function updateContactStatus(contactId: string, newStatus: string, oldStatus?: string) {
   const contact = await getContactSubmission(contactId)
-  if (!contact) return null
+  if (!contact || typeof contact !== 'object' || !('id' in contact)) return null
 
-  const updated = { ...contact, status: newStatus }
+  const updated: ContactFormSubmission = { ...contact as ContactFormSubmission, status: newStatus as any }
 
   if (newStatus === 'read' && !updated.readAt) {
     updated.readAt = new Date().toISOString()

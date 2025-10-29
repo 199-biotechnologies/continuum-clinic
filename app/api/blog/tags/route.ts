@@ -10,8 +10,12 @@ const tagSchema = z.object({
 // GET - List all tags
 export async function GET() {
   try {
-    const tags = await getTagsList()
-    const tagsWithCounts = await getAllTags()
+    await requireAdminAuth()
+    const tagsResult = await getTagsList()
+    const tagsWithCountsResult = await getAllTags()
+
+    const tags: string[] = Array.isArray(tagsResult) ? tagsResult : []
+    const tagsWithCounts: string[] = Array.isArray(tagsWithCountsResult) ? tagsWithCountsResult : []
 
     return NextResponse.json({
       tags: tags.map(tag => ({
@@ -31,13 +35,7 @@ export async function GET() {
 // POST - Create tag (admin only)
 export async function POST(request: NextRequest) {
   try {
-    const authResult = await requireAdminAuth(request)
-    if (!authResult.authenticated) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
-    }
+    await requireAdminAuth()
 
     const body = await request.json()
     const { name } = tagSchema.parse(body)

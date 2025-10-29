@@ -8,13 +8,7 @@ export async function DELETE(
   { params }: { params: Promise<{ name: string }> }
 ) {
   try {
-    const authResult = await requireAdminAuth(request)
-    if (!authResult.authenticated) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
-    }
+    await requireAdminAuth()
 
     const { name } = await params
     await deleteCategory(decodeURIComponent(name))
