@@ -31,11 +31,11 @@ export default async function BlogPage({ params, searchParams }: BlogPageProps) 
 
   // Apply filters
   if (category) {
-    posts = posts.filter((post: Post) => post.category === category)
+    posts = posts.filter(post => post.category === category)
   }
 
   if (tag) {
-    posts = posts.filter((post: Post) => post.tags.includes(tag))
+    posts = posts.filter(post => post.tags.includes(tag))
   }
 
   const categories = await getAllCategories()
