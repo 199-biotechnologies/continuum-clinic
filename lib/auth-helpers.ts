@@ -1,10 +1,24 @@
-import { cookies } from 'next/headers'
+import { cookies, headers } from 'next/headers'
 import { jwtVerify } from 'jose'
 import { getAdmin } from './redis'
 import { redirect } from 'next/navigation'
 
 const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || '')
 const CLIENT_JWT_SECRET = new TextEncoder().encode(process.env.CLIENT_JWT_SECRET || '')
+
+/**
+ * Get the current locale from headers
+ */
+function getLocale(): string {
+  try {
+    const headersList = headers()
+    const pathname = headersList.get('x-pathname') || ''
+    const localeMatch = pathname.match(/^\/([a-z]{2})\//)
+    return localeMatch ? localeMatch[1] : 'en'
+  } catch {
+    return 'en'
+  }
+}
 
 /**
  * Server-side helper to require admin authentication
@@ -14,22 +28,23 @@ const CLIENT_JWT_SECRET = new TextEncoder().encode(process.env.CLIENT_JWT_SECRET
 export async function requireAdminAuth() {
   const cookieStore = await cookies()
   const token = cookieStore.get('admin-token')?.value
+  const locale = getLocale()
 
   if (!token) {
-    redirect('/admin')
+    redirect(`/${locale}/admin`)
   }
 
   try {
     const { payload } = await jwtVerify(token, JWT_SECRET)
 
     if (!payload.userId || payload.role !== 'admin') {
-      redirect('/admin')
+      redirect(`/${locale}/admin`)
     }
 
     // Verify admin still exists in Redis
     const admin = await getAdmin(payload.userId as string)
     if (!admin) {
-      redirect('/admin')
+      redirect(`/${locale}/admin`)
     }
 
     return {
@@ -38,7 +53,7 @@ export async function requireAdminAuth() {
       role: 'admin' as const
     }
   } catch (error) {
-    redirect('/admin')
+    redirect(`/${locale}/admin`)
   }
 }
 
@@ -50,16 +65,17 @@ export async function requireAdminAuth() {
 export async function requireClientAuth() {
   const cookieStore = await cookies()
   const token = cookieStore.get('client-token')?.value
+  const locale = getLocale()
 
   if (!token) {
-    redirect('/portal')
+    redirect(`/${locale}/portal`)
   }
 
   try {
     const { payload } = await jwtVerify(token, CLIENT_JWT_SECRET)
 
     if (!payload.userId || payload.role !== 'client') {
-      redirect('/portal')
+      redirect(`/${locale}/portal`)
     }
 
     return {
@@ -68,7 +84,7 @@ export async function requireClientAuth() {
       role: 'client' as const
     }
   } catch (error) {
-    redirect('/portal')
+    redirect(`/${locale}/portal`)
   }
 }
 

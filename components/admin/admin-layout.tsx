@@ -14,11 +14,13 @@ export function AdminLayout({ children, title, actions }: AdminLayoutProps) {
 
   const handleLogout = async () => {
     try {
-      const response = await fetch('/api/auth/logout', {
+      const response = await fetch('/api/auth/admin/logout', {
         method: 'POST',
       })
       if (response.ok) {
-        router.push('/admin')
+        // Get current locale from pathname
+        const locale = window.location.pathname.split('/')[1] || 'en'
+        router.push(`/${locale}/admin`)
         router.refresh()
       }
     } catch (error) {

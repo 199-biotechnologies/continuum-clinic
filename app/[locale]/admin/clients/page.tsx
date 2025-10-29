@@ -1,119 +1,934 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useRouter, usePathname } from 'next/navigation'
 import { AdminLayout } from '@/components/admin/admin-layout'
-import Link from 'next/link'
-import { Users, Search, Plus } from 'lucide-react'
+import { Plus } from 'lucide-react'
+
+interface Client {
+  id: string
+  email: string
+  firstName: string
+  lastName: string
+  phone?: string
+  address?: {
+    street?: string
+    city?: string
+    postcode?: string
+    country?: string
+  }
+  notes?: string
+  createdAt: string
+  updatedAt: string
+}
+
+interface Pet {
+  id: string
+  clientId: string
+  name: string
+  species: string
+  breed?: string
+}
+
+interface ClientWithMetadata extends Client {
+  petsCount: number
+  pets: Pet[]
+  lastVisit?: string
+}
 
 export default function AdminClientsPage() {
-  const [clients, setClients] = useState<any[]>([])
+  const router = useRouter()
+  const pathname = usePathname()
+  const locale = pathname?.split('/')[1] || 'en'
+  const [clients, setClients] = useState<ClientWithMetadata[]>([])
+  const [filteredClients, setFilteredClients] = useState<ClientWithMetadata[]>([])
   const [loading, setLoading] = useState(true)
-  const [search, setSearch] = useState('')
+  const [error, setError] = useState<string | null>(null)
+  const [searchQuery, setSearchQuery] = useState('')
 
-  useEffect(() => {
-    fetchClients()
-  }, [])
+  // Modal states
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false)
+  const [selectedClient, setSelectedClient] = useState<ClientWithMetadata | null>(null)
 
+  // Form states
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    street: '',
+    city: '',
+    postcode: '',
+    country: '',
+    notes: ''
+  })
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({})
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  // Fetch clients
   const fetchClients = async () => {
     try {
+      setLoading(true)
+      setError(null)
       const response = await fetch('/api/admin/clients')
-      if (response.ok) {
-        const data = await response.json()
-        setClients(data.clients || [])
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch clients')
       }
-    } catch (error) {
-      console.error('Failed to fetch clients:', error)
+
+      const data = await response.json()
+
+      // Enrich clients with metadata
+      const enrichedClients = await Promise.all(
+        data.clients.map(async (client: Client) => {
+          try {
+            const clientResponse = await fetch(`/api/admin/clients/${client.id}`)
+            if (clientResponse.ok) {
+              const clientData = await clientResponse.json()
+              return {
+                ...client,
+                petsCount: clientData.pets?.length || 0,
+                pets: clientData.pets || [],
+                lastVisit: undefined // Will be populated when appointments API is available
+              }
+            }
+            return {
+              ...client,
+              petsCount: 0,
+              pets: [],
+              lastVisit: undefined
+            }
+          } catch {
+            return {
+              ...client,
+              petsCount: 0,
+              pets: [],
+              lastVisit: undefined
+            }
+          }
+        })
+      )
+
+      setClients(enrichedClients)
+      setFilteredClients(enrichedClients)
+    } catch (err: any) {
+      setError(err.message || 'Failed to load clients')
     } finally {
       setLoading(false)
     }
   }
 
-  const filteredClients = clients.filter(client =>
-    client && (
-      `${client.firstName} ${client.lastName}`.toLowerCase().includes(search.toLowerCase()) ||
-      client.email?.toLowerCase().includes(search.toLowerCase()) ||
-      client.phone?.includes(search)
+  useEffect(() => {
+    fetchClients()
+  }, [])
+
+  // Search filter
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setFilteredClients(clients)
+      return
+    }
+
+    const query = searchQuery.toLowerCase()
+    const filtered = clients.filter(client =>
+      client.firstName.toLowerCase().includes(query) ||
+      client.lastName.toLowerCase().includes(query) ||
+      client.email.toLowerCase().includes(query) ||
+      (client.phone && client.phone.toLowerCase().includes(query))
     )
-  )
+    setFilteredClients(filtered)
+  }, [searchQuery, clients])
+
+  // Validation
+  const validateForm = () => {
+    const errors: Record<string, string> = {}
+
+    if (!formData.firstName.trim()) {
+      errors.firstName = 'First name is required'
+    }
+
+    if (!formData.lastName.trim()) {
+      errors.lastName = 'Last name is required'
+    }
+
+    if (!formData.email.trim()) {
+      errors.email = 'Email is required'
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      errors.email = 'Invalid email format'
+    }
+
+    if (formData.phone && !/^[\d\s\-\+\(\)]+$/.test(formData.phone)) {
+      errors.phone = 'Invalid phone format'
+    }
+
+    setFormErrors(errors)
+    return Object.keys(errors).length === 0
+  }
+
+  // Reset form
+  const resetForm = () => {
+    setFormData({
+      firstName: '',
+      lastName: '',
+      email: '',
+      phone: '',
+      street: '',
+      city: '',
+      postcode: '',
+      country: '',
+      notes: ''
+    })
+    setFormErrors({})
+    setSelectedClient(null)
+  }
+
+  // Create client
+  const handleCreate = async () => {
+    if (!validateForm()) return
+
+    setIsSubmitting(true)
+    try {
+      const response = await fetch('/api/admin/clients', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          email: formData.email,
+          phone: formData.phone || undefined,
+          address: formData.street || formData.city || formData.postcode || formData.country ? {
+            street: formData.street || undefined,
+            city: formData.city || undefined,
+            postcode: formData.postcode || undefined,
+            country: formData.country || undefined,
+          } : undefined,
+          notes: formData.notes || undefined
+        })
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to create client')
+      }
+
+      await fetchClients()
+      setIsCreateModalOpen(false)
+      resetForm()
+    } catch (err: any) {
+      setFormErrors({ submit: err.message })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // Edit client
+  const handleEdit = async () => {
+    if (!validateForm() || !selectedClient) return
+
+    setIsSubmitting(true)
+    try {
+      const response = await fetch(`/api/admin/clients/${selectedClient.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          phone: formData.phone || undefined,
+          address: formData.street || formData.city || formData.postcode || formData.country ? {
+            street: formData.street || undefined,
+            city: formData.city || undefined,
+            postcode: formData.postcode || undefined,
+            country: formData.country || undefined,
+          } : undefined,
+          notes: formData.notes || undefined
+        })
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to update client')
+      }
+
+      await fetchClients()
+      setIsEditModalOpen(false)
+      resetForm()
+    } catch (err: any) {
+      setFormErrors({ submit: err.message })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // Delete client
+  const handleDelete = async () => {
+    if (!selectedClient) return
+
+    setIsSubmitting(true)
+    try {
+      const response = await fetch(`/api/admin/clients/${selectedClient.id}`, {
+        method: 'DELETE'
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to delete client')
+      }
+
+      await fetchClients()
+      setIsDeleteModalOpen(false)
+      resetForm()
+    } catch (err: any) {
+      alert(err.message)
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // Open create modal
+  const openCreateModal = () => {
+    resetForm()
+    setIsCreateModalOpen(true)
+  }
+
+  // Open edit modal
+  const openEditModal = (client: ClientWithMetadata) => {
+    setSelectedClient(client)
+    setFormData({
+      firstName: client.firstName,
+      lastName: client.lastName,
+      email: client.email,
+      phone: client.phone || '',
+      street: client.address?.street || '',
+      city: client.address?.city || '',
+      postcode: client.address?.postcode || '',
+      country: client.address?.country || '',
+      notes: client.notes || ''
+    })
+    setIsEditModalOpen(true)
+  }
+
+  // Open delete modal
+  const openDeleteModal = (client: ClientWithMetadata) => {
+    setSelectedClient(client)
+    setIsDeleteModalOpen(true)
+  }
+
+  // Open view modal
+  const openViewModal = (client: ClientWithMetadata) => {
+    setSelectedClient(client)
+    setIsViewModalOpen(true)
+  }
+
+
+  // Format date
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return 'Never'
+    const date = new Date(dateString)
+    return date.toLocaleDateString('en-GB', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric'
+    })
+  }
 
   const actions = (
-    <Link
-      href="/admin/clients/new"
-      className="flex items-center gap-2 px-4 py-2 text-sm font-light bg-foreground text-background rounded-md hover:opacity-90 transition-opacity"
+    <button
+      onClick={openCreateModal}
+      className="flex items-center gap-2 px-4 py-2 bg-foreground text-background rounded-md text-sm font-light hover:opacity-80 transition-opacity"
     >
       <Plus className="w-4 h-4" />
-      Add Client
-    </Link>
+      Add New Client
+    </button>
   )
 
   return (
     <AdminLayout title="Clients" actions={actions}>
-      {/* Search */}
-      <div className="mb-6">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <input
-            type="text"
-            placeholder="Search by name, email, or phone..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 rounded-md border border-border bg-background text-sm font-light focus:outline-none focus:ring-1 focus:ring-foreground"
-          />
-        </div>
-      </div>
+      <div className="max-w-7xl mx-auto">{/* Header */}
 
-      {/* Clients Table */}
-      {loading ? (
-        <div className="text-center py-16">
-          <p className="text-lg font-extralight text-muted-foreground">Loading clients...</p>
+          {/* Search */}
+          <div className="mb-6">
+            <input
+              type="text"
+              placeholder="Search by name, email, or phone..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full px-4 py-2 border rounded-md bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-foreground"
+            />
+          </div>
+
+          {/* Loading State */}
+          {loading && (
+            <div className="border rounded-lg p-12 bg-card text-center">
+              <p className="text-sm text-muted-foreground">Loading clients...</p>
+            </div>
+          )}
+
+          {/* Error State */}
+          {error && !loading && (
+            <div className="border border-red-500 rounded-lg p-6 bg-card text-center">
+              <p className="text-sm text-red-500">{error}</p>
+              <button
+                onClick={fetchClients}
+                className="mt-4 px-4 py-2 bg-foreground text-background rounded-md text-sm font-light"
+              >
+                Retry
+              </button>
+            </div>
+          )}
+
+          {/* Empty State */}
+          {!loading && !error && filteredClients.length === 0 && !searchQuery && (
+            <div className="border rounded-lg p-12 bg-card text-center">
+              <p className="text-sm text-muted-foreground mb-4">No clients yet. Add your first client to get started.</p>
+              <button
+                onClick={openCreateModal}
+                className="px-4 py-2 bg-foreground text-background rounded-md text-sm font-light"
+              >
+                Add First Client
+              </button>
+            </div>
+          )}
+
+          {/* No Search Results */}
+          {!loading && !error && filteredClients.length === 0 && searchQuery && (
+            <div className="border rounded-lg p-6 bg-card text-center">
+              <p className="text-sm text-muted-foreground">No clients found matching "{searchQuery}"</p>
+            </div>
+          )}
+
+          {/* Clients Table */}
+          {!loading && !error && filteredClients.length > 0 && (
+            <div className="border rounded-lg overflow-hidden bg-card">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b bg-muted/50">
+                      <th className="px-6 py-3 text-left text-xs font-light text-muted-foreground uppercase tracking-wider">Name</th>
+                      <th className="px-6 py-3 text-left text-xs font-light text-muted-foreground uppercase tracking-wider">Email</th>
+                      <th className="px-6 py-3 text-left text-xs font-light text-muted-foreground uppercase tracking-wider">Phone</th>
+                      <th className="px-6 py-3 text-left text-xs font-light text-muted-foreground uppercase tracking-wider">Pets</th>
+                      <th className="px-6 py-3 text-left text-xs font-light text-muted-foreground uppercase tracking-wider">Last Visit</th>
+                      <th className="px-6 py-3 text-right text-xs font-light text-muted-foreground uppercase tracking-wider">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y">
+                    {filteredClients.map((client) => (
+                      <tr
+                        key={client.id}
+                        className="hover:bg-muted/30 transition-colors cursor-pointer"
+                        onClick={() => openViewModal(client)}
+                      >
+                        <td className="px-6 py-4 text-sm">
+                          {client.firstName} {client.lastName}
+                        </td>
+                        <td className="px-6 py-4 text-sm text-muted-foreground">
+                          {client.email}
+                        </td>
+                        <td className="px-6 py-4 text-sm text-muted-foreground">
+                          {client.phone || '—'}
+                        </td>
+                        <td className="px-6 py-4 text-sm">
+                          {client.petsCount}
+                        </td>
+                        <td className="px-6 py-4 text-sm text-muted-foreground">
+                          {formatDate(client.lastVisit)}
+                        </td>
+                        <td className="px-6 py-4 text-sm text-right">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              openEditModal(client)
+                            }}
+                            className="text-foreground hover:opacity-70 mr-4"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              openDeleteModal(client)
+                            }}
+                            className="text-red-600 hover:opacity-70"
+                          >
+                            Delete
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
         </div>
-      ) : filteredClients.length === 0 ? (
-        <div className="text-center py-16 border border-border rounded-lg bg-card">
-          <Users className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-          <p className="text-lg font-extralight text-muted-foreground">No clients found</p>
-          <p className="text-sm font-extralight text-muted-foreground mt-2">
-            {search ? 'Try adjusting your search' : 'Create your first client to get started'}
-          </p>
+
+      {/* Create Modal */}
+      {isCreateModalOpen && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-background border rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b">
+              <h2 className="text-2xl font-light">Add New Client</h2>
+            </div>
+
+            <div className="p-6 space-y-4">
+              {/* First Name */}
+              <div>
+                <label className="block text-sm font-light mb-2">
+                  First Name <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={formData.firstName}
+                  onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                  className="w-full px-4 py-2 border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-foreground"
+                />
+                {formErrors.firstName && (
+                  <p className="mt-1 text-sm text-red-500">{formErrors.firstName}</p>
+                )}
+              </div>
+
+              {/* Last Name */}
+              <div>
+                <label className="block text-sm font-light mb-2">
+                  Last Name <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={formData.lastName}
+                  onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                  className="w-full px-4 py-2 border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-foreground"
+                />
+                {formErrors.lastName && (
+                  <p className="mt-1 text-sm text-red-500">{formErrors.lastName}</p>
+                )}
+              </div>
+
+              {/* Email */}
+              <div>
+                <label className="block text-sm font-light mb-2">
+                  Email <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  className="w-full px-4 py-2 border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-foreground"
+                />
+                {formErrors.email && (
+                  <p className="mt-1 text-sm text-red-500">{formErrors.email}</p>
+                )}
+              </div>
+
+              {/* Phone */}
+              <div>
+                <label className="block text-sm font-light mb-2">
+                  Phone
+                </label>
+                <input
+                  type="tel"
+                  value={formData.phone}
+                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  className="w-full px-4 py-2 border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-foreground"
+                />
+                {formErrors.phone && (
+                  <p className="mt-1 text-sm text-red-500">{formErrors.phone}</p>
+                )}
+              </div>
+
+              {/* Address */}
+              <div className="space-y-4">
+                <h3 className="text-sm font-light text-muted-foreground">Address (Optional)</h3>
+
+                <div>
+                  <label className="block text-sm font-light mb-2">Street</label>
+                  <input
+                    type="text"
+                    value={formData.street}
+                    onChange={(e) => setFormData({ ...formData, street: e.target.value })}
+                    className="w-full px-4 py-2 border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-foreground"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-light mb-2">City</label>
+                    <input
+                      type="text"
+                      value={formData.city}
+                      onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                      className="w-full px-4 py-2 border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-foreground"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-light mb-2">Postcode</label>
+                    <input
+                      type="text"
+                      value={formData.postcode}
+                      onChange={(e) => setFormData({ ...formData, postcode: e.target.value })}
+                      className="w-full px-4 py-2 border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-foreground"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-light mb-2">Country</label>
+                  <input
+                    type="text"
+                    value={formData.country}
+                    onChange={(e) => setFormData({ ...formData, country: e.target.value })}
+                    className="w-full px-4 py-2 border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-foreground"
+                  />
+                </div>
+              </div>
+
+              {/* Notes */}
+              <div>
+                <label className="block text-sm font-light mb-2">Notes</label>
+                <textarea
+                  value={formData.notes}
+                  onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                  rows={3}
+                  className="w-full px-4 py-2 border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-foreground"
+                />
+              </div>
+
+              {formErrors.submit && (
+                <p className="text-sm text-red-500">{formErrors.submit}</p>
+              )}
+            </div>
+
+            <div className="p-6 border-t flex justify-end gap-4">
+              <button
+                onClick={() => {
+                  setIsCreateModalOpen(false)
+                  resetForm()
+                }}
+                disabled={isSubmitting}
+                className="px-4 py-2 border rounded-md text-sm font-light hover:bg-muted transition-colors disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleCreate}
+                disabled={isSubmitting}
+                className="px-4 py-2 bg-foreground text-background rounded-md text-sm font-light hover:opacity-80 transition-opacity disabled:opacity-50"
+              >
+                {isSubmitting ? 'Creating...' : 'Create Client'}
+              </button>
+            </div>
+          </div>
         </div>
-      ) : (
-        <div className="border border-border rounded-lg overflow-hidden bg-card">
-          <table className="w-full">
-            <thead className="bg-muted/5 border-b border-border">
-              <tr>
-                <th className="text-left px-6 py-3 text-sm font-light">Name</th>
-                <th className="text-left px-6 py-3 text-sm font-light">Email</th>
-                <th className="text-left px-6 py-3 text-sm font-light">Phone</th>
-                <th className="text-left px-6 py-3 text-sm font-light">Registered</th>
-                <th className="text-left px-6 py-3 text-sm font-light">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredClients.map((client) => (
-                <tr key={client.id} className="border-b border-border last:border-0 hover:bg-muted/5 transition-colors">
-                  <td className="px-6 py-4 text-sm font-extralight">
-                    {client.firstName} {client.lastName}
-                  </td>
-                  <td className="px-6 py-4 text-sm font-extralight">
-                    {client.email}
-                  </td>
-                  <td className="px-6 py-4 text-sm font-extralight">
-                    {client.phone || '-'}
-                  </td>
-                  <td className="px-6 py-4 text-sm font-extralight">
-                    {new Date(client.createdAt).toLocaleDateString()}
-                  </td>
-                  <td className="px-6 py-4">
-                    <Link
-                      href={`/admin/clients/${client.id}`}
-                      className="text-sm font-light text-foreground hover:opacity-70 transition-opacity"
-                    >
-                      View
-                    </Link>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      )}
+
+      {/* Edit Modal */}
+      {isEditModalOpen && selectedClient && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-background border rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b">
+              <h2 className="text-2xl font-light">Edit Client</h2>
+            </div>
+
+            <div className="p-6 space-y-4">
+              {/* First Name */}
+              <div>
+                <label className="block text-sm font-light mb-2">
+                  First Name <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={formData.firstName}
+                  onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                  className="w-full px-4 py-2 border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-foreground"
+                />
+                {formErrors.firstName && (
+                  <p className="mt-1 text-sm text-red-500">{formErrors.firstName}</p>
+                )}
+              </div>
+
+              {/* Last Name */}
+              <div>
+                <label className="block text-sm font-light mb-2">
+                  Last Name <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={formData.lastName}
+                  onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                  className="w-full px-4 py-2 border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-foreground"
+                />
+                {formErrors.lastName && (
+                  <p className="mt-1 text-sm text-red-500">{formErrors.lastName}</p>
+                )}
+              </div>
+
+              {/* Email (read-only) */}
+              <div>
+                <label className="block text-sm font-light mb-2">Email</label>
+                <input
+                  type="email"
+                  value={formData.email}
+                  disabled
+                  className="w-full px-4 py-2 border rounded-md bg-muted text-muted-foreground cursor-not-allowed"
+                />
+                <p className="mt-1 text-xs text-muted-foreground">Email cannot be changed</p>
+              </div>
+
+              {/* Phone */}
+              <div>
+                <label className="block text-sm font-light mb-2">Phone</label>
+                <input
+                  type="tel"
+                  value={formData.phone}
+                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  className="w-full px-4 py-2 border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-foreground"
+                />
+                {formErrors.phone && (
+                  <p className="mt-1 text-sm text-red-500">{formErrors.phone}</p>
+                )}
+              </div>
+
+              {/* Address */}
+              <div className="space-y-4">
+                <h3 className="text-sm font-light text-muted-foreground">Address</h3>
+
+                <div>
+                  <label className="block text-sm font-light mb-2">Street</label>
+                  <input
+                    type="text"
+                    value={formData.street}
+                    onChange={(e) => setFormData({ ...formData, street: e.target.value })}
+                    className="w-full px-4 py-2 border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-foreground"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-light mb-2">City</label>
+                    <input
+                      type="text"
+                      value={formData.city}
+                      onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                      className="w-full px-4 py-2 border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-foreground"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-light mb-2">Postcode</label>
+                    <input
+                      type="text"
+                      value={formData.postcode}
+                      onChange={(e) => setFormData({ ...formData, postcode: e.target.value })}
+                      className="w-full px-4 py-2 border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-foreground"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-light mb-2">Country</label>
+                  <input
+                    type="text"
+                    value={formData.country}
+                    onChange={(e) => setFormData({ ...formData, country: e.target.value })}
+                    className="w-full px-4 py-2 border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-foreground"
+                  />
+                </div>
+              </div>
+
+              {/* Notes */}
+              <div>
+                <label className="block text-sm font-light mb-2">Notes</label>
+                <textarea
+                  value={formData.notes}
+                  onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                  rows={3}
+                  className="w-full px-4 py-2 border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-foreground"
+                />
+              </div>
+
+              {formErrors.submit && (
+                <p className="text-sm text-red-500">{formErrors.submit}</p>
+              )}
+            </div>
+
+            <div className="p-6 border-t flex justify-end gap-4">
+              <button
+                onClick={() => {
+                  setIsEditModalOpen(false)
+                  resetForm()
+                }}
+                disabled={isSubmitting}
+                className="px-4 py-2 border rounded-md text-sm font-light hover:bg-muted transition-colors disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleEdit}
+                disabled={isSubmitting}
+                className="px-4 py-2 bg-foreground text-background rounded-md text-sm font-light hover:opacity-80 transition-opacity disabled:opacity-50"
+              >
+                {isSubmitting ? 'Saving...' : 'Save Changes'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {isDeleteModalOpen && selectedClient && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-background border rounded-lg max-w-md w-full">
+            <div className="p-6 border-b">
+              <h2 className="text-2xl font-light">Delete Client</h2>
+            </div>
+
+            <div className="p-6">
+              <p className="text-sm text-muted-foreground mb-4">
+                Are you sure you want to delete {selectedClient.firstName} {selectedClient.lastName}?
+              </p>
+              <p className="text-sm text-red-500">
+                This action cannot be undone. All associated data will be permanently deleted.
+              </p>
+            </div>
+
+            <div className="p-6 border-t flex justify-end gap-4">
+              <button
+                onClick={() => {
+                  setIsDeleteModalOpen(false)
+                  resetForm()
+                }}
+                disabled={isSubmitting}
+                className="px-4 py-2 border rounded-md text-sm font-light hover:bg-muted transition-colors disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDelete}
+                disabled={isSubmitting}
+                className="px-4 py-2 bg-red-600 text-white rounded-md text-sm font-light hover:bg-red-700 transition-colors disabled:opacity-50"
+              >
+                {isSubmitting ? 'Deleting...' : 'Delete Client'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* View Client Details Modal */}
+      {isViewModalOpen && selectedClient && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-background border rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b flex justify-between items-center">
+              <h2 className="text-2xl font-light">
+                {selectedClient.firstName} {selectedClient.lastName}
+              </h2>
+              <button
+                onClick={() => setIsViewModalOpen(false)}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                Close
+              </button>
+            </div>
+
+            <div className="p-6 space-y-6">
+              {/* Contact Information */}
+              <div>
+                <h3 className="text-sm font-light text-muted-foreground uppercase tracking-wider mb-3">
+                  Contact Information
+                </h3>
+                <div className="space-y-2">
+                  <div className="flex">
+                    <span className="w-24 text-sm text-muted-foreground">Email:</span>
+                    <span className="text-sm">{selectedClient.email}</span>
+                  </div>
+                  <div className="flex">
+                    <span className="w-24 text-sm text-muted-foreground">Phone:</span>
+                    <span className="text-sm">{selectedClient.phone || '—'}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Address */}
+              {selectedClient.address && (
+                <div>
+                  <h3 className="text-sm font-light text-muted-foreground uppercase tracking-wider mb-3">
+                    Address
+                  </h3>
+                  <div className="text-sm">
+                    {selectedClient.address.street && <p>{selectedClient.address.street}</p>}
+                    {selectedClient.address.city && <p>{selectedClient.address.city}</p>}
+                    {selectedClient.address.postcode && <p>{selectedClient.address.postcode}</p>}
+                    {selectedClient.address.country && <p>{selectedClient.address.country}</p>}
+                  </div>
+                </div>
+              )}
+
+              {/* Notes */}
+              {selectedClient.notes && (
+                <div>
+                  <h3 className="text-sm font-light text-muted-foreground uppercase tracking-wider mb-3">
+                    Notes
+                  </h3>
+                  <p className="text-sm">{selectedClient.notes}</p>
+                </div>
+              )}
+
+              {/* Pets */}
+              <div>
+                <h3 className="text-sm font-light text-muted-foreground uppercase tracking-wider mb-3">
+                  Pets ({selectedClient.petsCount})
+                </h3>
+                {selectedClient.pets.length > 0 ? (
+                  <div className="space-y-2">
+                    {selectedClient.pets.map((pet) => (
+                      <div key={pet.id} className="border rounded-lg p-4">
+                        <p className="text-sm font-light">
+                          {pet.name} - {pet.species}
+                          {pet.breed && ` (${pet.breed})`}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground">No pets registered</p>
+                )}
+              </div>
+
+              {/* Metadata */}
+              <div>
+                <h3 className="text-sm font-light text-muted-foreground uppercase tracking-wider mb-3">
+                  Account Information
+                </h3>
+                <div className="space-y-2">
+                  <div className="flex">
+                    <span className="w-32 text-sm text-muted-foreground">Created:</span>
+                    <span className="text-sm">{formatDate(selectedClient.createdAt)}</span>
+                  </div>
+                  <div className="flex">
+                    <span className="w-32 text-sm text-muted-foreground">Last Updated:</span>
+                    <span className="text-sm">{formatDate(selectedClient.updatedAt)}</span>
+                  </div>
+                  <div className="flex">
+                    <span className="w-32 text-sm text-muted-foreground">Last Visit:</span>
+                    <span className="text-sm">{formatDate(selectedClient.lastVisit)}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-6 border-t flex justify-end gap-4">
+              <button
+                onClick={() => {
+                  setIsViewModalOpen(false)
+                  openEditModal(selectedClient)
+                }}
+                className="px-4 py-2 bg-foreground text-background rounded-md text-sm font-light hover:opacity-80 transition-opacity"
+              >
+                Edit Client
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </AdminLayout>

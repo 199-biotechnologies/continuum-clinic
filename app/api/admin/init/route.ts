@@ -12,8 +12,9 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { email, password, secret } = body
 
-    // Verify init secret (simple protection - in production use better auth)
-    if (secret !== 'initialize-admin-2025') {
+    // Verify init secret from environment variable
+    const ADMIN_INIT_SECRET = process.env.ADMIN_INIT_SECRET
+    if (!ADMIN_INIT_SECRET || secret !== ADMIN_INIT_SECRET) {
       return NextResponse.json(
         { error: 'Invalid initialization secret' },
         { status: 403 }
