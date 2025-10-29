@@ -71,6 +71,7 @@ export default function AdminPage() {
                   <input
                     type="email"
                     required
+                    autoComplete="email"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     className="w-full px-4 py-3 rounded-md border border-muted bg-background text-sm font-extralight focus:outline-none focus:ring-1 focus:ring-foreground"
@@ -85,6 +86,7 @@ export default function AdminPage() {
                   <input
                     type="password"
                     required
+                    autoComplete="current-password"
                     value={formData.password}
                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                     className="w-full px-4 py-3 rounded-md border border-muted bg-background text-sm font-extralight focus:outline-none focus:ring-1 focus:ring-foreground"

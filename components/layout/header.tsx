@@ -9,45 +9,23 @@ export function Header() {
 
   return (
     <>
-      {/* SVG Filter Definition for Liquid Glass Effect */}
-      <svg className="absolute w-0 h-0" aria-hidden="true">
-        <defs>
-          <filter id="liquid-glass-filter" colorInterpolationFilters="sRGB">
-            {/* Subtle turbulence for organic distortion */}
-            <feTurbulence type="fractalNoise" baseFrequency="0.008 0.012" numOctaves="3" seed="2" result="noise"/>
-            {/* Light displacement for glass refraction */}
-            <feDisplacementMap in="SourceGraphic" in2="noise" scale="4" xChannelSelector="R" yChannelSelector="G" result="displace"/>
-            {/* Gaussian blur for frosted effect */}
-            <feGaussianBlur in="displace" stdDeviation="0.5" result="blur"/>
-            {/* Enhanced color saturation */}
-            <feColorMatrix in="blur" type="saturate" values="1.4" result="saturate"/>
-            {/* Subtle chromatic aberration */}
-            <feComponentTransfer in="saturate" result="chromatic">
-              <feFuncR type="linear" slope="1.02" intercept="0.01"/>
-              <feFuncG type="linear" slope="0.98" intercept="0"/>
-              <feFuncB type="linear" slope="1.01" intercept="0.01"/>
-            </feComponentTransfer>
-            {/* Specular lighting for glass highlights */}
-            <feSpecularLighting in="chromatic" surfaceScale="3" specularConstant="0.5" specularExponent="15" lightingColor="#ffffff" result="specular">
-              <fePointLight x="-5000" y="-8000" z="15000"/>
-            </feSpecularLighting>
-            {/* Blend specular with source */}
-            <feComposite in="chromatic" in2="specular" operator="arithmetic" k1="0" k2="1" k3="0.15" k4="0" result="composite"/>
-            <feBlend in="composite" in2="SourceGraphic" mode="normal"/>
-          </filter>
-        </defs>
-      </svg>
-
-      {/* Desktop Header - Floating Capsule */}
+      {/* Desktop Header - Floating Capsule with Glassmorphism */}
       <div className="fixed top-6 left-0 right-0 z-50 flex justify-center px-6 lg:px-8">
-        {/* Capsule Container - overflow-hidden clips all internal effects to rounded boundary */}
-        <div className="relative transition-all duration-300 overflow-hidden rounded-full shadow-2xl shadow-gray-900/10">
-          {/* Liquid Glass Background */}
-          <div className="absolute inset-0 liquid-glass-header" />
-          {/* Gradient overlay for enhanced frosted look */}
-          <div className="absolute inset-0 bg-gradient-to-b from-white/30 via-white/10 to-transparent pointer-events-none" />
-          {/* Top highlight shimmer */}
-          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/60 to-transparent pointer-events-none" />
+        {/* Capsule Container */}
+        <div className="relative overflow-hidden rounded-full">
+          {/* Multiple layered backgrounds for depth */}
+          <div className="absolute inset-0 bg-white/80" />
+          <div className="absolute inset-0 glass-blur" />
+          <div className="absolute inset-0 bg-gradient-to-b from-white/40 via-white/20 to-white/10" />
+
+          {/* Border glow */}
+          <div className="absolute inset-0 rounded-full ring-1 ring-white/40 ring-inset" />
+
+          {/* Top shimmer */}
+          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/80 to-transparent" />
+
+          {/* Bottom shadow */}
+          <div className="absolute inset-0 rounded-full shadow-2xl shadow-black/10" />
 
           {/* Content */}
           <nav className="relative flex items-center justify-between px-6 lg:px-8 py-3 lg:py-4 gap-8 lg:gap-12">

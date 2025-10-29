@@ -214,7 +214,7 @@
   }
 }
 
-/* Custom transitions - from Micaela design system */
+/* Custom transitions */
 @layer utilities {
   .transition-smooth {
     transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
@@ -224,59 +224,26 @@
     transition: all 0.25s cubic-bezier(0.76, 0, 0.24, 1);
   }
 
-  /* Liquid Glass Effect - Micaela Implementation (better visibility) */
-  .liquid-glass-header {
-    background: linear-gradient(
-      135deg,
-      rgba(255, 255, 255, 0.12) 0%,
-      rgba(255, 255, 255, 0.08) 100%
-    );
-    backdrop-filter: blur(30px) saturate(180%) brightness(1.1) contrast(110%);
-    -webkit-backdrop-filter: blur(30px) saturate(180%) brightness(1.1) contrast(110%);
-    filter: url(#liquid-glass-filter);
+  /* Strong Glass Blur Effect - iOS/macOS Style */
+  .glass-blur {
+    backdrop-filter: blur(40px) saturate(180%) brightness(1.05);
+    -webkit-backdrop-filter: blur(40px) saturate(180%) brightness(1.05);
   }
 
-  /* Mobile: bar style with bottom border */
-  @media (max-width: 767px) {
-    .liquid-glass-header {
-      box-shadow:
-        0 8px 32px rgba(0, 0, 0, 0.08),
-        inset 0 -1px 0 rgba(255, 255, 255, 0.15),
-        inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  /* Fallback for browsers without backdrop-filter */
+  @supports not (backdrop-filter: blur(40px)) {
+    .glass-blur {
+      background: rgba(255, 255, 255, 0.92) !important;
     }
   }
 
-  /* Desktop: floating oval style */
-  @media (min-width: 768px) {
-    .liquid-glass-header {
-      box-shadow:
-        0 12px 48px rgba(0, 0, 0, 0.1),
-        0 4px 16px rgba(0, 0, 0, 0.06),
-        inset 0 -1px 0 rgba(255, 255, 255, 0.15),
-        inset 0 1px 0 rgba(255, 255, 255, 0.5);
-    }
-  }
-
+  /* Dropdown glass effect */
   .liquid-glass-dropdown {
-    background: linear-gradient(
-      135deg,
-      rgba(255, 255, 255, 0.15) 0%,
-      rgba(255, 255, 255, 0.1) 100%
-    );
-    backdrop-filter: blur(30px) saturate(180%) brightness(1.15) contrast(110%);
-    -webkit-backdrop-filter: blur(30px) saturate(180%) brightness(1.15) contrast(110%);
-    filter: url(#liquid-glass-filter);
+    background: rgba(255, 255, 255, 0.90);
+    backdrop-filter: blur(30px) saturate(180%);
+    -webkit-backdrop-filter: blur(30px) saturate(180%);
     box-shadow:
       0 12px 48px rgba(0, 0, 0, 0.12),
-      inset 0 -1px 0 rgba(255, 255, 255, 0.2),
       inset 0 1px 0 rgba(255, 255, 255, 0.6);
-  }
-
-  /* Fallback for browsers without filter support */
-  @supports not (filter: url(#liquid-glass-filter)) {
-    .liquid-glass-header,
-    .liquid-glass-dropdown {
-      background: rgba(255, 255, 255, 0.85);
-    }
   }
 }
