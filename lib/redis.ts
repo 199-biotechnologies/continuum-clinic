@@ -15,7 +15,7 @@ export async function getSession(sessionId: string) {
 }
 
 export async function setSession(sessionId: string, data: any, expirySeconds: number) {
-  return await redis.setex(`session:${sessionId}`, expirySeconds, data)
+  return await redis.set(`session:${sessionId}`, data, { ex: expirySeconds })
 }
 
 export async function deleteSession(sessionId: string) {
@@ -30,7 +30,7 @@ export async function getClientSession(sessionId: string) {
 }
 
 export async function setClientSession(sessionId: string, clientId: string, expirySeconds: number) {
-  return await redis.setex(`session:client:${sessionId}`, expirySeconds, clientId)
+  return await redis.set(`session:client:${sessionId}`, clientId, { ex: expirySeconds })
 }
 
 export async function deleteClientSession(sessionId: string) {
@@ -243,7 +243,7 @@ export async function getAnalytics(date: string) {
  * Cache management
  */
 export async function cacheSet(key: string, value: any, ttlSeconds: number = 3600) {
-  return await redis.setex(`cache:${key}`, ttlSeconds, value)
+  return await redis.set(`cache:${key}`, value, { ex: ttlSeconds })
 }
 
 export async function cacheGet(key: string) {
