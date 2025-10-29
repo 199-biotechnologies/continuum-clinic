@@ -12,20 +12,15 @@ export function Header() {
       {/* Desktop Header - Floating Capsule with Glassmorphism */}
       <div className="fixed top-6 left-0 right-0 z-50 flex justify-center px-6 lg:px-8">
         {/* Capsule Container */}
-        <div className="relative overflow-hidden rounded-full">
-          {/* Multiple layered backgrounds for depth */}
-          <div className="absolute inset-0 bg-white/80" />
+        <div className="relative overflow-hidden rounded-full shadow-2xl shadow-black/10">
+          {/* Glass blur effect - MUST be first to blur content behind */}
           <div className="absolute inset-0 glass-blur" />
-          <div className="absolute inset-0 bg-gradient-to-b from-white/40 via-white/20 to-white/10" />
 
-          {/* Border glow */}
+          {/* Gradient overlay for depth */}
+          <div className="absolute inset-0 bg-gradient-to-b from-white/30 via-white/20 to-white/10" />
+
+          {/* Border ring */}
           <div className="absolute inset-0 rounded-full ring-1 ring-white/40 ring-inset" />
-
-          {/* Top shimmer */}
-          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/80 to-transparent" />
-
-          {/* Bottom shadow */}
-          <div className="absolute inset-0 rounded-full shadow-2xl shadow-black/10" />
 
           {/* Content */}
           <nav className="relative flex items-center justify-between px-6 lg:px-8 py-3 lg:py-4 gap-8 lg:gap-12">
