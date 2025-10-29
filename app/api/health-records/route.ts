@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getClientUser } from '@/lib/auth-helpers'
-import { getAllPets } from '@/lib/redis'
+import { getAllPets, getPetHealthRecords } from '@/lib/redis'
 
 /**
  * GET /api/health-records
@@ -21,9 +21,17 @@ export async function GET(request: NextRequest) {
     const allPets = await getAllPets()
     const clientPets = allPets.filter((pet: any) => pet.clientId === user.userId)
 
-    // For now, return empty health records
-    // TODO: Implement health records storage and retrieval
-    const healthRecords: any[] = []
+    // Fetch health records for all client's pets
+    const healthRecordsPromises = clientPets.map((pet: any) =>
+      getPetHealthRecords(pet.id)
+    )
+    const petHealthRecords = await Promise.all(healthRecordsPromises)
+
+    // Flatten the array of arrays into a single array
+    const healthRecords = petHealthRecords.flat()
+
+    // Sort by date (most recent first)
+    healthRecords.sort((a: any, b: any) => b.date - a.date)
 
     return NextResponse.json({
       healthRecords,

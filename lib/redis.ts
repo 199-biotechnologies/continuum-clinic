@@ -205,6 +205,23 @@ export async function getPetHealthRecords(petId: string, limit: number = 50) {
   return records.filter(Boolean)
 }
 
+export async function getAllHealthRecords() {
+  const recordIds = await redis.smembers('health-records:index')
+  const records = await Promise.all(
+    (recordIds as string[]).map(id => getHealthRecord(id))
+  )
+  return records.filter(Boolean)
+}
+
+export async function deleteHealthRecord(recordId: string) {
+  const record = await getHealthRecord(recordId) as any
+  if (record?.petId) {
+    await redis.zrem(`health-records:pet:${record.petId}`, recordId)
+  }
+  await redis.srem('health-records:index', recordId)
+  return await redis.del(`health-record:${recordId}`)
+}
+
 /**
  * Appointment management
  */
@@ -590,4 +607,54 @@ export async function getNotificationSettings() {
 
 export async function saveNotificationSettings(settings: any) {
   return await redis.set('notification:settings', settings)
+}
+
+/**
+ * SEO Page Management
+ */
+export async function getSEOPage(pageId: string) {
+  return await redis.get(`seo:page:${pageId}`)
+}
+
+export async function setSEOPage(pageId: string, data: any) {
+  await redis.set(`seo:page:${pageId}`, data)
+  await redis.sadd('seo:pages:index', pageId)
+}
+
+export async function getAllSEOPages() {
+  const pageIds = await redis.smembers('seo:pages:index')
+  const pages = await Promise.all(
+    (pageIds as string[]).map(id => getSEOPage(id))
+  )
+  return pages.filter(Boolean)
+}
+
+export async function deleteSEOPage(pageId: string) {
+  await redis.srem('seo:pages:index', pageId)
+  return await redis.del(`seo:page:${pageId}`)
+}
+
+/**
+ * Redirects Management
+ */
+export async function getRedirect(redirectId: string) {
+  return await redis.get(`redirect:${redirectId}`)
+}
+
+export async function setRedirect(redirectId: string, data: any) {
+  await redis.set(`redirect:${redirectId}`, data)
+  await redis.sadd('redirects:index', redirectId)
+}
+
+export async function getAllRedirects() {
+  const redirectIds = await redis.smembers('redirects:index')
+  const redirects = await Promise.all(
+    (redirectIds as string[]).map(id => getRedirect(id))
+  )
+  return redirects.filter(Boolean)
+}
+
+export async function deleteRedirect(redirectId: string) {
+  await redis.srem('redirects:index', redirectId)
+  return await redis.del(`redirect:${redirectId}`)
 }
