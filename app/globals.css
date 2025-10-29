@@ -83,38 +83,38 @@
   body {
     @apply bg-background text-foreground;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    font-weight: 300;
+    font-weight: 200;
     font-feature-settings: "rlig" 1, "calt" 1;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     transition: background-color var(--duration-base) ease, color var(--duration-base) ease;
   }
 
-  /* Typography scale - Light weights */
+  /* Typography scale - Ultralight weights */
   h1 {
     @apply text-4xl tracking-tight md:text-5xl lg:text-6xl;
-    font-weight: 300;
-    letter-spacing: -0.02em;
+    font-weight: 200;
+    letter-spacing: -0.025em;
   }
 
   h2 {
     @apply text-3xl tracking-tight md:text-4xl;
-    font-weight: 300;
+    font-weight: 200;
   }
 
   h3 {
     @apply text-2xl md:text-3xl;
-    font-weight: 400;
+    font-weight: 300;
   }
 
   h4 {
     @apply text-xl md:text-2xl;
-    font-weight: 400;
+    font-weight: 300;
   }
 
   p {
     @apply leading-7;
-    font-weight: 300;
+    font-weight: 200;
   }
 
   /* Link underline animation */
@@ -149,4 +149,67 @@
   overflow: visible;
   clip: auto;
   white-space: normal;
+}
+
+/* Subtle Particle Animations */
+.particle {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  background: currentColor;
+  border-radius: 50%;
+  opacity: 0.4;
+  animation: float linear infinite;
+}
+
+.particle-1 {
+  top: 20%;
+  left: 10%;
+  animation-duration: 25s;
+  animation-delay: 0s;
+}
+
+.particle-2 {
+  top: 60%;
+  left: 30%;
+  animation-duration: 30s;
+  animation-delay: -5s;
+}
+
+.particle-3 {
+  top: 40%;
+  left: 70%;
+  animation-duration: 35s;
+  animation-delay: -10s;
+}
+
+.particle-4 {
+  top: 80%;
+  left: 50%;
+  animation-duration: 28s;
+  animation-delay: -15s;
+}
+
+.particle-5 {
+  top: 10%;
+  left: 90%;
+  animation-duration: 32s;
+  animation-delay: -20s;
+}
+
+@keyframes float {
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.4;
+  }
+  90% {
+    opacity: 0.4;
+  }
+  100% {
+    transform: translate(0, -100vh) scale(0.5);
+    opacity: 0;
+  }
 }

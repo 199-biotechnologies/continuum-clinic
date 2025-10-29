@@ -16,47 +16,60 @@ export default function HomePage() {
 
       <main className="flex-1">
         {/* Hero Section */}
-        <Section gutter="md" className="relative">
-          <Container>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-              {/* Text Content */}
-              <div>
+        <section className="relative min-h-[85vh] flex items-center overflow-hidden">
+          {/* Background Image with Parallax Effect */}
+          <div className="absolute inset-0 z-0">
+            <Image
+              src="/images/hero-dachshund-faith.jpg"
+              alt="Dachshund patient at Continuum Clinic"
+              fill
+              priority
+              className="object-cover object-center scale-105"
+              sizes="100vw"
+              quality={90}
+            />
+            {/* Gradient Overlay for Text Visibility */}
+            <div className="absolute inset-0 bg-gradient-to-r from-background/95 via-background/75 to-background/40" />
+
+            {/* Subtle Particle Effect - Pure CSS */}
+            <div className="absolute inset-0 opacity-30">
+              <div className="particle particle-1" />
+              <div className="particle particle-2" />
+              <div className="particle particle-3" />
+              <div className="particle particle-4" />
+              <div className="particle particle-5" />
+            </div>
+          </div>
+
+          {/* Content */}
+          <Container className="relative z-10">
+            <div className="max-w-2xl">
+              {/* Glassmorphism Container */}
+              <div className="backdrop-blur-sm bg-background/20 p-8 md:p-12 rounded-lg border border-foreground/10">
                 <h1 className="mb-6">
                   {t('hero_title')}
                 </h1>
-                <p className="text-xl text-muted-foreground mb-8">
+                <p className="text-xl mb-8 leading-relaxed">
                   {t('hero_subtitle')}
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4">
                   <Link
                     href="/book-consultation"
-                    className="inline-flex items-center justify-center rounded-md bg-foreground text-background px-8 py-3 text-sm font-medium transition-colors hover:bg-foreground/90"
+                    className="inline-flex items-center justify-center rounded-md bg-foreground text-background px-8 py-3 text-sm font-medium transition-all hover:bg-foreground/90 hover:scale-105"
                   >
                     {t('hero_cta')}
                   </Link>
                   <Link
                     href="/about"
-                    className="inline-flex items-center justify-center rounded-md border border-foreground px-8 py-3 text-sm font-medium transition-colors hover:bg-foreground hover:text-background"
+                    className="inline-flex items-center justify-center rounded-md border border-foreground bg-background/50 backdrop-blur-sm px-8 py-3 text-sm font-medium transition-all hover:bg-foreground hover:text-background"
                   >
                     {t('hero_learn_more')}
                   </Link>
                 </div>
               </div>
-
-              {/* Hero Image */}
-              <div className="relative aspect-[4/3] w-full">
-                <Image
-                  src="/images/hero-dachshund-faith.jpg"
-                  alt="Dachshund patient at Continuum Clinic"
-                  fill
-                  priority
-                  className="object-cover rounded-lg"
-                  sizes="(max-width: 768px) 100vw, 50vw"
-                />
-              </div>
             </div>
           </Container>
-        </Section>
+        </section>
 
         {/* Services Section */}
         <Section className="bg-muted/10">
