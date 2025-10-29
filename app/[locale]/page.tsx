@@ -28,8 +28,8 @@ export default function HomePage() {
               sizes="100vw"
               quality={90}
             />
-            {/* Subtle vignette for text visibility */}
-            <div className="absolute inset-0 bg-gradient-to-b from-background/30 via-transparent to-background/50" />
+            {/* Dark overlay for text visibility */}
+            <div className="absolute inset-0 bg-black/50" />
 
             {/* Subtle Particle Effect - Pure CSS */}
             <div className="absolute inset-0 opacity-20">
@@ -43,23 +43,23 @@ export default function HomePage() {
 
           {/* Content - Centered */}
           <Container className="relative z-10">
-            <div className="max-w-3xl mx-auto text-center">
-              <h1 className="mb-6 drop-shadow-[0_2px_12px_rgba(0,0,0,0.8)]">
+            <div className="max-w-3xl mx-auto text-center text-white">
+              <h1 className="mb-6">
                 {t('hero_title')}
               </h1>
-              <p className="text-xl mb-8 leading-relaxed drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">
+              <p className="text-xl mb-8 leading-relaxed text-white/90">
                 {t('hero_subtitle')}
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link
                   href="/book-consultation"
-                  className="inline-flex items-center justify-center rounded-md bg-foreground text-background px-8 py-3 text-sm font-medium transition-all hover:bg-foreground/90 hover:scale-105 shadow-lg"
+                  className="inline-flex items-center justify-center rounded-md bg-white text-black px-8 py-3 text-sm font-medium transition-all hover:bg-white/90 hover:scale-105"
                 >
                   {t('hero_cta')}
                 </Link>
                 <Link
                   href="/about"
-                  className="inline-flex items-center justify-center rounded-md border border-foreground backdrop-blur-sm bg-background/30 px-8 py-3 text-sm font-medium transition-all hover:bg-foreground hover:text-background shadow-lg"
+                  className="inline-flex items-center justify-center rounded-md border-2 border-white text-white px-8 py-3 text-sm font-medium transition-all hover:bg-white hover:text-black"
                 >
                   {t('hero_learn_more')}
                 </Link>
