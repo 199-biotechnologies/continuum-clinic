@@ -81,6 +81,26 @@ export function ContactForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div>
+        <label htmlFor="type" className="block text-sm font-light mb-2">
+          Inquiry Type
+        </label>
+        <select
+          id="type"
+          name="type"
+          value={formData.type}
+          onChange={handleChange}
+          required
+          className="w-full px-4 py-2 border border-muted rounded-md bg-background font-extralight text-sm focus:outline-none focus:ring-1 focus:ring-foreground transition-all"
+        >
+          <option value="general">General Inquiry</option>
+          <option value="consultation">Book Consultation</option>
+          <option value="investment">Investment/Partnership</option>
+          <option value="media">Media Request</option>
+          <option value="careers">Careers</option>
+        </select>
+      </div>
+
+      <div>
         <label htmlFor="name" className="block text-sm font-light mb-2">
           {t('contact_name')}
         </label>
@@ -108,6 +128,37 @@ export function ContactForm() {
           required
           className="w-full px-4 py-2 border border-muted rounded-md bg-background font-extralight text-sm focus:outline-none focus:ring-1 focus:ring-foreground transition-all"
         />
+      </div>
+
+      <div>
+        <label htmlFor="phone" className="block text-sm font-light mb-2">
+          Phone (Optional)
+        </label>
+        <input
+          type="tel"
+          id="phone"
+          name="phone"
+          value={formData.phone}
+          onChange={handleChange}
+          className="w-full px-4 py-2 border border-muted rounded-md bg-background font-extralight text-sm focus:outline-none focus:ring-1 focus:ring-foreground transition-all"
+        />
+      </div>
+
+      <div>
+        <label htmlFor="preferredContact" className="block text-sm font-light mb-2">
+          Preferred Contact Method
+        </label>
+        <select
+          id="preferredContact"
+          name="preferredContact"
+          value={formData.preferredContact}
+          onChange={handleChange}
+          required
+          className="w-full px-4 py-2 border border-muted rounded-md bg-background font-extralight text-sm focus:outline-none focus:ring-1 focus:ring-foreground transition-all"
+        >
+          <option value="email">Email</option>
+          <option value="phone">Phone</option>
+        </select>
       </div>
 
       <div>

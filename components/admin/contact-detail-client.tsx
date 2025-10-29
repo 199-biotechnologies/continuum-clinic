@@ -2,9 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import { ContactFormSubmission } from '@/types/communications'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Textarea } from '@/components/ui/textarea'
 import { format } from 'date-fns'
 import { toast } from 'sonner'
 

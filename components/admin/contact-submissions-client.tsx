@@ -77,15 +77,17 @@ export function ContactSubmissionsClient() {
       {/* Filters */}
       <div className="mb-6 flex gap-2 flex-wrap">
         {['all', 'new', 'read', 'replied', 'archived'].map((status) => (
-          <Button
+          <button
             key={status}
-            variant={filter === status ? 'default' : 'outline'}
-            size="sm"
             onClick={() => setFilter(status)}
-            className="font-light"
+            className={`px-4 py-2 text-sm font-light rounded-md transition-colors ${
+              filter === status
+                ? 'bg-foreground text-background'
+                : 'border border-foreground/20 hover:border-foreground'
+            }`}
           >
             {status.charAt(0).toUpperCase() + status.slice(1)}
-          </Button>
+          </button>
         ))}
       </div>
 
@@ -107,9 +109,9 @@ export function ContactSubmissionsClient() {
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-2">
                     <div className={`w-2 h-2 rounded-full ${statusColors[contact.status]}`} />
-                    <Badge variant="outline" className="font-light">
+                    <span className="px-2 py-1 text-xs font-light border rounded">
                       {typeLabels[contact.type]}
-                    </Badge>
+                    </span>
                     <span className="text-xs font-light text-muted-foreground">
                       {formatDistanceToNow(new Date(contact.submittedAt), { addSuffix: true })}
                     </span>
@@ -140,18 +142,16 @@ export function ContactSubmissionsClient() {
 
                 <div className="flex gap-2">
                   <Link href={`/admin/communications/contact/${contact.id}`}>
-                    <Button variant="outline" size="sm" className="font-light">
+                    <button className="px-4 py-2 text-sm font-light border rounded-md hover:border-foreground transition-colors">
                       View
-                    </Button>
+                    </button>
                   </Link>
-                  <Button
-                    variant="ghost"
-                    size="sm"
+                  <button
                     onClick={() => handleDelete(contact.id)}
-                    className="font-light text-destructive hover:text-destructive"
+                    className="px-4 py-2 text-sm font-light text-red-600 hover:text-red-700 transition-colors"
                   >
                     Delete
-                  </Button>
+                  </button>
                 </div>
               </div>
             </div>
