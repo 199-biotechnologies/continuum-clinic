@@ -1,8 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'; import { usePathname } from 'next/navigation'
-import { AdminSidebar } from '@/components/admin/sidebar'
+import { useRouter, usePathname } from 'next/navigation'
+import { AdminLayout } from '@/components/admin/admin-layout'
 import { Plus, Search, Edit, Trash2, Eye, X, Check, AlertCircle, Dog } from 'lucide-react'
 
 interface Client {
@@ -42,6 +42,8 @@ type ModalMode = 'create' | 'edit' | 'view' | null
 
 export default function AdminPetsPage() {
   const router = useRouter()
+  const pathname = usePathname()
+  const locale = pathname?.split('/')[1] || 'en'
   const [pets, setPets] = useState<PetWithClient[]>([])
   const [clients, setClients] = useState<Client[]>([])
   const [loading, setLoading] = useState(true)
@@ -296,28 +298,19 @@ export default function AdminPetsPage() {
     return matchesSearch && matchesSpecies && matchesClient
   })
 
-  return (
-    <div className="flex min-h-screen bg-background">
-      <AdminSidebar onLogout={handleLogout} />
+  const actions = (
+    <button
+      onClick={() => openModal('create')}
+      className="flex items-center gap-2 px-4 py-2 bg-foreground text-background rounded-md text-sm font-light hover:opacity-80 transition-opacity"
+    >
+      <Plus className="w-4 h-4" />
+      Add New Pet
+    </button>
+  )
 
-      <main className="flex-1 p-8">
-        <div className="max-w-7xl mx-auto">
-          {/* Header */}
-          <div className="flex justify-between items-center mb-8">
-            <div>
-              <h1 className="text-3xl font-light">Pets</h1>
-              <p className="text-sm text-muted-foreground mt-1">
-                Manage pet profiles and medical records
-              </p>
-            </div>
-            <button
-              onClick={() => openModal('create')}
-              className="px-4 py-2 bg-foreground text-background rounded-md text-sm font-light flex items-center gap-2 hover:bg-foreground/90 transition-colors"
-            >
-              <Plus className="w-4 h-4" />
-              Add New Pet
-            </button>
-          </div>
+  return (
+    <AdminLayout title="Pets" actions={actions}>
+      <div className="max-w-7xl mx-auto">
 
           {/* Success/Error Messages */}
           {success && (
@@ -910,6 +903,6 @@ export default function AdminPetsPage() {
           </div>
         </div>
       )}
-    </div>
+    </AdminLayout>
   )
 }
