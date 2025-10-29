@@ -29,7 +29,7 @@ const navigation = [
     name: 'Content',
     icon: FileText,
     children: [
-      { name: 'Blog Posts', href: '/admin/content/posts', icon: FileText },
+      { name: 'Blog Posts', href: '/admin/content/blog', icon: FileText },
       { name: 'Categories', href: '/admin/content/categories', icon: FolderOpen },
       { name: 'Tags', href: '/admin/content/tags', icon: Tag },
     ]
