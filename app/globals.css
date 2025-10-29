@@ -1,0 +1,117 @@
+@import "tailwindcss";
+
+@theme {
+  /* Color System - Minimalist 2-color approach */
+  --color-background: #ffffff;
+  --color-foreground: #000000;
+  --color-muted: #707070;
+  --color-muted-foreground: #707070;
+  --color-border: #e5e5e5;
+
+  /* Typography - System fonts for performance */
+  --font-sans: ui-sans-serif, system-ui, sans-serif;
+
+  /* 8pt Spacing Grid */
+  --spacing-xs: 0.75rem;  /* 12px */
+  --spacing-sm: 1rem;     /* 16px */
+  --spacing-md: 1.5rem;   /* 24px */
+  --spacing-lg: 2rem;     /* 32px */
+  --spacing-xl: 3rem;     /* 48px */
+  --spacing-2xl: 4rem;    /* 64px */
+  --spacing-3xl: 6rem;    /* 96px */
+
+  /* Animation timing */
+  --duration-fast: 150ms;
+  --duration-base: 250ms;
+  --duration-slow: 350ms;
+}
+
+@layer base {
+  /* Root element - supports next-themes */
+  :root {
+    --background: var(--color-background);
+    --foreground: var(--color-foreground);
+    --muted: var(--color-muted);
+    --border: var(--color-border);
+  }
+
+  /* Dark mode - applied via next-themes .dark class */
+  .dark {
+    --color-background: #000000;
+    --color-foreground: #ffffff;
+    --color-border: #333333;
+  }
+
+  /* System preference fallback (when JS disabled) */
+  @media (prefers-color-scheme: dark) {
+    :root:not(.light) {
+      --color-background: #000000;
+      --color-foreground: #ffffff;
+      --color-border: #333333;
+    }
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    transition: background-color var(--duration-base) ease, color var(--duration-base) ease;
+  }
+
+  /* Typography scale */
+  h1 {
+    @apply text-4xl font-bold tracking-tight md:text-5xl lg:text-6xl;
+  }
+
+  h2 {
+    @apply text-3xl font-bold tracking-tight md:text-4xl;
+  }
+
+  h3 {
+    @apply text-2xl font-semibold md:text-3xl;
+  }
+
+  h4 {
+    @apply text-xl font-semibold md:text-2xl;
+  }
+
+  p {
+    @apply leading-7;
+  }
+
+  /* Link underline animation */
+  a {
+    @apply relative transition-colors duration-200;
+  }
+
+  a:hover {
+    @apply text-muted;
+  }
+}
+
+/* Skip to main content link - Accessibility */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+.focus\:not-sr-only:focus {
+  position: static;
+  width: auto;
+  height: auto;
+  padding: 0.5rem 1rem;
+  margin: 0;
+  overflow: visible;
+  clip: auto;
+  white-space: normal;
+}
