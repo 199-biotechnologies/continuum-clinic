@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600&display=swap');
 @import "tailwindcss";
 
 /* Root CSS variables for theme colors */
@@ -64,8 +65,8 @@
   --color-destructive-foreground: hsl(var(--destructive-foreground));
   --color-ring: hsl(var(--ring));
 
-  /* Typography - System fonts for performance */
-  --font-sans: ui-sans-serif, system-ui, sans-serif;
+  /* Typography - Inter with light weights */
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 
   /* Radius */
   --radius-sm: calc(var(--radius) - 4px);
@@ -81,29 +82,39 @@
 
   body {
     @apply bg-background text-foreground;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-weight: 300;
     font-feature-settings: "rlig" 1, "calt" 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
     transition: background-color var(--duration-base) ease, color var(--duration-base) ease;
   }
 
-  /* Typography scale */
+  /* Typography scale - Light weights */
   h1 {
-    @apply text-4xl font-bold tracking-tight md:text-5xl lg:text-6xl;
+    @apply text-4xl tracking-tight md:text-5xl lg:text-6xl;
+    font-weight: 300;
+    letter-spacing: -0.02em;
   }
 
   h2 {
-    @apply text-3xl font-bold tracking-tight md:text-4xl;
+    @apply text-3xl tracking-tight md:text-4xl;
+    font-weight: 300;
   }
 
   h3 {
-    @apply text-2xl font-semibold md:text-3xl;
+    @apply text-2xl md:text-3xl;
+    font-weight: 400;
   }
 
   h4 {
-    @apply text-xl font-semibold md:text-2xl;
+    @apply text-xl md:text-2xl;
+    font-weight: 400;
   }
 
   p {
     @apply leading-7;
+    font-weight: 300;
   }
 
   /* Link underline animation */
