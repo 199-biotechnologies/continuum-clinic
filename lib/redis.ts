@@ -100,6 +100,8 @@ export async function setClientPasswordHash(clientId: string, passwordHash: stri
 
 export async function getAllClients() {
   const clientIds = await redis.smembers('clients:index')
+  if (!clientIds || clientIds.length === 0) return []
+
   const clients = await Promise.all(
     (clientIds as string[]).map(id => getClient(id))
   )
