@@ -27,7 +27,7 @@ export default async function BlogPage({ params, searchParams }: BlogPageProps) 
   let posts = await getPostsByLocale(locale, 100)
 
   // Filter only published posts
-  posts = posts.filter((post: Post) => post.status === 'published')
+  posts = posts.filter((post): post is Post => post !== null && (post as Post).status === 'published')
 
   // Apply filters
   if (category) {
