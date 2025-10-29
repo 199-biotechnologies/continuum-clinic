@@ -17,6 +17,7 @@ export interface AdminSession {
   email: string
   role: 'admin'
   createdAt: number
+  [key: string]: string | number
 }
 
 export interface ClientSession {
@@ -24,6 +25,7 @@ export interface ClientSession {
   email: string
   role: 'client'
   createdAt: number
+  [key: string]: string | number
 }
 
 /**
