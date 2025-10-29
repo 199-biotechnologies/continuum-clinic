@@ -26,6 +26,7 @@
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "jose": "^5.9.6",
+    "jsonwebtoken": "^9.0.2",
     "lucide-react": "^0.454.0",
     "next": "^15.3.3",
     "next-intl": "^4.4.0",
@@ -45,6 +46,7 @@
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.10",
     "@types/bcryptjs": "^2.4.6",
+    "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^22",
     "@types/react": "^19",
     "@types/react-dom": "^19",
@@ -55,6 +57,7 @@
     "eslint-config-next": "^15.3.3",
     "postcss": "^8.5",
     "tailwindcss": "^4.1.10",
+    "tsx": "^4.20.6",
     "tw-animate-css": "^1.3.4",
     "typescript": "^5"
   }

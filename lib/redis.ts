@@ -38,6 +38,36 @@ export async function deleteClientSession(sessionId: string) {
 }
 
 /**
+ * Admin management
+ */
+export async function getAdmin(adminId: string) {
+  const data = await redis.get(`admin:${adminId}`)
+  return data ? JSON.parse(data as string) : null
+}
+
+export async function setAdmin(adminId: string, adminData: any) {
+  await redis.set(`admin:${adminId}`, JSON.stringify(adminData))
+}
+
+export async function getAdminByEmail(email: string) {
+  const adminId = await redis.get(`admin:email:${email}`)
+  if (!adminId) return null
+  return await getAdmin(adminId as string)
+}
+
+export async function setAdminEmailMapping(email: string, adminId: string) {
+  return await redis.set(`admin:email:${email}`, adminId)
+}
+
+export async function getAdminPasswordHash(adminId: string) {
+  return await redis.get(`admin:${adminId}:password`)
+}
+
+export async function setAdminPasswordHash(adminId: string, passwordHash: string) {
+  return await redis.set(`admin:${adminId}:password`, passwordHash)
+}
+
+/**
  * Client management
  */
 export async function getClient(clientId: string) {
@@ -58,6 +88,14 @@ export async function getClientByEmail(email: string) {
 
 export async function setClientEmailMapping(email: string, clientId: string) {
   return await redis.set(`clients:email:${email}`, clientId)
+}
+
+export async function getClientPasswordHash(clientId: string) {
+  return await redis.get(`client:${clientId}:password`)
+}
+
+export async function setClientPasswordHash(clientId: string, passwordHash: string) {
+  return await redis.set(`client:${clientId}:password`, passwordHash)
 }
 
 export async function getAllClients() {

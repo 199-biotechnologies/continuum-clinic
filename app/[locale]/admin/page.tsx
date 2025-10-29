@@ -21,12 +21,30 @@ export default function AdminPage() {
     setStatus('submitting')
     setMessage('')
 
-    // Admin authentication functionality will be implemented when Redis/auth system is ready
-    // For now, show informative message
-    setTimeout(() => {
+    try {
+      const response = await fetch('/api/auth/admin/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Authentication failed')
+      }
+
+      setStatus('success')
+      setMessage('Login successful! Redirecting...')
+
+      // Redirect to admin dashboard
+      setTimeout(() => {
+        window.location.href = '/admin/dashboard'
+      }, 1000)
+    } catch (error) {
       setStatus('error')
-      setMessage('Admin authentication system is currently being configured. Please contact Boris at boris@199.clinic for access.')
-    }, 500)
+      setMessage(error instanceof Error ? error.message : 'Authentication failed')
+    }
   }
 
   return (

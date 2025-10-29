@@ -25,12 +25,34 @@ export default function ClientPortalPage() {
     setStatus('submitting')
     setMessage('')
 
-    // Authentication functionality will be implemented when Redis/auth system is ready
-    // For now, show informative message
-    setTimeout(() => {
+    try {
+      const endpoint = mode === 'login'
+        ? '/api/auth/client/login'
+        : '/api/auth/client/register'
+
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Authentication failed')
+      }
+
+      setStatus('success')
+      setMessage(mode === 'login' ? 'Login successful! Redirecting...' : 'Account created! Redirecting...')
+
+      // Redirect to portal dashboard
+      setTimeout(() => {
+        window.location.href = '/portal/dashboard'
+      }, 1000)
+    } catch (error) {
       setStatus('error')
-      setMessage('Portal authentication system is currently being configured. Please contact us directly at info@thecontinuumclinic.com to set up your account.')
-    }, 500)
+      setMessage(error instanceof Error ? error.message : 'Authentication failed')
+    }
   }
 
   return (
