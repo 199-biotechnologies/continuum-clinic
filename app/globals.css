@@ -214,19 +214,29 @@
   }
 }
 
-/* Liquid Glass Navigation */
+/* Liquid Glass Navigation - Pure CSS Glassmorphism */
 .liquid-glass-nav {
-  background: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(20px) saturate(180%) contrast(45%) brightness(140%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%) contrast(45%) brightness(140%);
-  filter: url(#liquid-glass);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1),
-              inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  transition: all 0.3s ease;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(16px) saturate(150%);
+  -webkit-backdrop-filter: blur(16px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.12),
+              inset 0 1px 1px 0 rgba(255, 255, 255, 0.1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .liquid-glass-nav:hover {
-  background: rgba(255, 255, 255, 0.12);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15),
-              inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.22);
+  box-shadow: 0 12px 48px 0 rgba(0, 0, 0, 0.16),
+              inset 0 1px 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+/* Liquid Glass Dropdown */
+.liquid-glass-dropdown {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(16px) saturate(150%);
+  -webkit-backdrop-filter: blur(16px) saturate(150%);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.15),
+              inset 0 1px 1px 0 rgba(255, 255, 255, 0.1);
 }

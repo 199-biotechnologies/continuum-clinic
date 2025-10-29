@@ -13,15 +13,15 @@ export function Footer() {
       <Container>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
           <div>
-            <h3 className="font-bold mb-4">Continuum Clinic</h3>
-            <p className="text-sm text-muted-foreground">
+            <h3 className="font-light mb-4 text-base">Continuum Clinic</h3>
+            <p className="text-sm font-extralight text-muted-foreground">
               {t('footer_description')}
             </p>
           </div>
 
           <div>
-            <h4 className="font-semibold mb-4">Contact</h4>
-            <div className="space-y-2 text-sm text-muted-foreground">
+            <h4 className="font-light mb-4 text-base">Contact</h4>
+            <div className="space-y-2 text-sm font-extralight text-muted-foreground">
               <p>{SITE_CONFIG.address.street}</p>
               <p>{SITE_CONFIG.address.city} {SITE_CONFIG.address.postcode}</p>
               <p>{SITE_CONFIG.email}</p>
@@ -30,15 +30,15 @@ export function Footer() {
           </div>
 
           <div>
-            <h4 className="font-semibold mb-4">Links</h4>
+            <h4 className="font-light mb-4 text-base">Links</h4>
             <nav className="flex flex-col space-y-2">
-              <Link href="/privacy" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+              <Link href="/privacy" className="text-sm font-extralight text-muted-foreground hover:text-foreground transition-colors">
                 {t('nav_privacy')}
               </Link>
-              <Link href="/terms" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+              <Link href="/terms" className="text-sm font-extralight text-muted-foreground hover:text-foreground transition-colors">
                 {t('nav_terms')}
               </Link>
-              <Link href="/portal" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+              <Link href="/portal" className="text-sm font-extralight text-muted-foreground hover:text-foreground transition-colors">
                 {t('nav_portal')}
               </Link>
             </nav>
@@ -46,7 +46,7 @@ export function Footer() {
         </div>
 
         <div className="border-t pt-8">
-          <p className="text-sm text-center text-muted-foreground">
+          <p className="text-sm font-extralight text-center text-muted-foreground">
             {t('footer_copyright')}
           </p>
         </div>
