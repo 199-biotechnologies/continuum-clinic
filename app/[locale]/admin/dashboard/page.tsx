@@ -53,7 +53,8 @@ export default async function AdminDashboardPage() {
           <div className="p-6 rounded-lg border border-border bg-card">
             <p className="text-sm font-light text-muted-foreground">New This Week</p>
             <p className="text-3xl font-extralight mt-2">
-              {clients.filter(c => {
+              {clients.filter((c: any) => {
+                if (!c || !c.createdAt) return false
                 const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000
                 return new Date(c.createdAt).getTime() > weekAgo
               }).length}
@@ -95,7 +96,7 @@ export default async function AdminDashboardPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {clients.map((client) => (
+                  {clients.filter((c): c is any => !!c).map((client) => (
                     <tr key={client.id} className="border-b border-border last:border-0 hover:bg-muted/5 transition-colors">
                       <td className="px-6 py-4 text-sm font-extralight">
                         {client.firstName} {client.lastName}

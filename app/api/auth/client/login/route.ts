@@ -14,13 +14,15 @@ export async function POST(request: NextRequest) {
     const { email, password } = loginSchema.parse(body)
 
     // Get client by email
-    const client = await getClientByEmail(email)
-    if (!client) {
+    const clientData = await getClientByEmail(email)
+    if (!clientData) {
       return NextResponse.json(
         { error: 'Invalid credentials' },
         { status: 401 }
       )
     }
+
+    const client = clientData as any
 
     // Verify password
     const passwordHash = await getClientPasswordHash(client.id)

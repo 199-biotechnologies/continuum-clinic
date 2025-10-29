@@ -7,11 +7,13 @@ export default async function PortalDashboardPage() {
   const user = await requireClientAuth()
 
   // Get full client data
-  const client = await getClient(user.userId)
+  const clientData = await getClient(user.userId)
 
-  if (!client) {
+  if (!clientData) {
     redirect('/portal')
   }
+
+  const client = clientData as any
 
   async function handleLogout() {
     'use server'

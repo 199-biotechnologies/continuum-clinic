@@ -14,13 +14,15 @@ export async function POST(request: NextRequest) {
     const { email, password } = loginSchema.parse(body)
 
     // Get admin by email
-    const admin = await getAdminByEmail(email)
-    if (!admin) {
+    const adminData = await getAdminByEmail(email)
+    if (!adminData) {
       return NextResponse.json(
         { error: 'Invalid credentials' },
         { status: 401 }
       )
     }
+
+    const admin = adminData as any
 
     // Verify password
     const passwordHash = await getAdminPasswordHash(admin.id)

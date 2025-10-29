@@ -191,6 +191,6 @@ export async function requireClientAuth(): Promise<ClientSession> {
  */
 export async function checkPetOwnership(petId: string, clientId: string): Promise<boolean> {
   const { getPet } = await import('./redis')
-  const pet = await getPet(petId)
+  const pet = await getPet(petId) as any
   return pet?.clientId === clientId
 }

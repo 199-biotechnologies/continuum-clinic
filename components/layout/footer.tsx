@@ -41,6 +41,9 @@ export function Footer() {
               <Link href="/portal" className="text-sm font-extralight text-muted-foreground hover:text-foreground transition-colors">
                 {t('nav_portal')}
               </Link>
+              <Link href="/admin" className="text-sm font-extralight text-muted-foreground hover:text-foreground transition-colors">
+                {t('admin_login')}
+              </Link>
             </nav>
           </div>
         </div>

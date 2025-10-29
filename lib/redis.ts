@@ -15,7 +15,7 @@ export async function getSession(sessionId: string) {
 }
 
 export async function setSession(sessionId: string, data: any, expirySeconds: number) {
-  return await redis.setex(`session:${sessionId}`, expirySeconds, JSON.stringify(data))
+  return await redis.setex(`session:${sessionId}`, expirySeconds, data)
 }
 
 export async function deleteSession(sessionId: string) {
@@ -42,11 +42,11 @@ export async function deleteClientSession(sessionId: string) {
  */
 export async function getAdmin(adminId: string) {
   const data = await redis.get(`admin:${adminId}`)
-  return data ? JSON.parse(data as string) : null
+  return data || null
 }
 
 export async function setAdmin(adminId: string, adminData: any) {
-  await redis.set(`admin:${adminId}`, JSON.stringify(adminData))
+  await redis.set(`admin:${adminId}`, adminData)
 }
 
 export async function getAdminByEmail(email: string) {
@@ -72,11 +72,11 @@ export async function setAdminPasswordHash(adminId: string, passwordHash: string
  */
 export async function getClient(clientId: string) {
   const data = await redis.get(`client:${clientId}`)
-  return data ? JSON.parse(data as string) : null
+  return data || null
 }
 
 export async function setClient(clientId: string, clientData: any) {
-  await redis.set(`client:${clientId}`, JSON.stringify(clientData))
+  await redis.set(`client:${clientId}`, clientData)
   await redis.sadd('clients:index', clientId)
 }
 
@@ -113,11 +113,11 @@ export async function getAllClients() {
  */
 export async function getPet(petId: string) {
   const data = await redis.get(`pet:${petId}`)
-  return data ? JSON.parse(data as string) : null
+  return data || null
 }
 
 export async function setPet(petId: string, petData: any) {
-  await redis.set(`pet:${petId}`, JSON.stringify(petData))
+  await redis.set(`pet:${petId}`, petData)
   await redis.sadd('pets:index', petId)
   if (petData.clientId) {
     await redis.sadd(`pets:client:${petData.clientId}`, petId)
@@ -145,11 +145,11 @@ export async function getAllPets() {
  */
 export async function getHealthRecord(recordId: string) {
   const data = await redis.get(`health-record:${recordId}`)
-  return data ? JSON.parse(data as string) : null
+  return data || null
 }
 
 export async function setHealthRecord(recordId: string, recordData: any) {
-  await redis.set(`health-record:${recordId}`, JSON.stringify(recordData))
+  await redis.set(`health-record:${recordId}`, recordData)
   await redis.sadd('health-records:index', recordId)
   if (recordData.petId) {
     await redis.zadd(`health-records:pet:${recordData.petId}`, {
@@ -172,11 +172,11 @@ export async function getPetHealthRecords(petId: string, limit: number = 50) {
  */
 export async function getAppointment(appointmentId: string) {
   const data = await redis.get(`appointment:${appointmentId}`)
-  return data ? JSON.parse(data as string) : null
+  return data || null
 }
 
 export async function setAppointment(appointmentId: string, appointmentData: any) {
-  await redis.set(`appointment:${appointmentId}`, JSON.stringify(appointmentData))
+  await redis.set(`appointment:${appointmentId}`, appointmentData)
   await redis.zadd('appointments:list', {
     score: new Date(appointmentData.date).getTime(),
     member: appointmentId
@@ -196,11 +196,11 @@ export async function getRecentAppointments(limit: number = 20) {
  */
 export async function getPost(postId: string) {
   const data = await redis.get(`post:${postId}`)
-  return data ? JSON.parse(data as string) : null
+  return data || null
 }
 
 export async function setPost(postId: string, postData: any) {
-  await redis.set(`post:${postId}`, JSON.stringify(postData))
+  await redis.set(`post:${postId}`, postData)
   await redis.lpush('posts:list', postId)
 }
 
@@ -243,12 +243,12 @@ export async function getAnalytics(date: string) {
  * Cache management
  */
 export async function cacheSet(key: string, value: any, ttlSeconds: number = 3600) {
-  return await redis.setex(`cache:${key}`, ttlSeconds, JSON.stringify(value))
+  return await redis.setex(`cache:${key}`, ttlSeconds, value)
 }
 
 export async function cacheGet(key: string) {
   const data = await redis.get(`cache:${key}`)
-  return data ? JSON.parse(data as string) : null
+  return data || null
 }
 
 /**
