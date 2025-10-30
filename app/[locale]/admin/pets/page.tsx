@@ -489,7 +489,6 @@ export default function AdminPetsPage() {
             </div>
           )}
         </div>
-      </main>
 
       {/* Create/Edit Modal */}
       {(modalMode === 'create' || modalMode === 'edit') && (
