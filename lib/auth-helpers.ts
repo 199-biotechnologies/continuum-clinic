@@ -9,9 +9,9 @@ const CLIENT_JWT_SECRET = new TextEncoder().encode(process.env.CLIENT_JWT_SECRET
 /**
  * Get the current locale from headers
  */
-function getLocale(): string {
+async function getLocale(): Promise<string> {
   try {
-    const headersList = headers()
+    const headersList = await headers()
     const pathname = headersList.get('x-pathname') || ''
     const localeMatch = pathname.match(/^\/([a-z]{2})\//)
     return localeMatch ? localeMatch[1] : 'en'
@@ -28,7 +28,7 @@ function getLocale(): string {
 export async function requireAdminAuth() {
   const cookieStore = await cookies()
   const token = cookieStore.get('admin-token')?.value
-  const locale = getLocale()
+  const locale = await getLocale()
 
   if (!token) {
     redirect(`/${locale}/admin`)
@@ -65,7 +65,7 @@ export async function requireAdminAuth() {
 export async function requireClientAuth() {
   const cookieStore = await cookies()
   const token = cookieStore.get('client-token')?.value
-  const locale = getLocale()
+  const locale = await getLocale()
 
   if (!token) {
     redirect(`/${locale}/portal`)
