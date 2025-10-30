@@ -154,7 +154,7 @@ export const presentationSlides: Slide[] = [
       '— NK cells (natural killer cell therapy for cancer)',
       '— Mesenchymal stem cells (regenerative protocols)',
       '',
-      'Delivering tomorrow's medicine — today.'
+      "Delivering tomorrow's medicine — today."
     ]
   },
   {
