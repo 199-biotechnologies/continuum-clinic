@@ -39,6 +39,9 @@ export default function ContactPage() {
         {/* Contact Information & Form */}
         <Section className="bg-muted/10">
           <Container>
+            <p className="text-sm text-center text-muted-foreground mb-8">
+              {t('contact_availability')}
+            </p>
             <div className="grid gap-12 md:grid-cols-2 max-w-5xl mx-auto">
               {/* Contact Details */}
               <div className="space-y-8">

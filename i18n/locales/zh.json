@@ -109,7 +109,7 @@
   "about_facilities_accred3": "Institutional biosafety certification",
   "about_facilities_accred4": "Certified laboratory diagnostic services",
   "about_location_title": "Location",
-  "about_location_description": "Based in London, serving clients throughout the UK and internationally.",
+  "about_location_description": "位于London。全球合作伙伴网络。",
   "about_location_address": "London, United Kingdom",
   "about_location_hours": "By appointment only",
   "about_location_phone": "Contact: info@thecontinuumclinic.com",
@@ -225,6 +225,7 @@
 
   "contact_title": "Contact Us",
   "contact_subtitle": "Get in touch for consultations, inquiries, or investment opportunities.",
+  "contact_availability": "预约名额有限",
   "contact_meta_title": "Contact - The Continuum Clinic",
   "contact_meta_description": "Contact The Continuum Clinic for veterinary longevity consultations, general inquiries, or investment opportunities.",
   "contact_name": "Name",
@@ -270,6 +271,7 @@
   "contact_emergency_referrals": "We can provide referrals to trusted emergency care providers in London.",
 
   "booking_title": "Book a Consultation",
+  "booking_pricing": "根据个性化方案定制价格。",
   "booking_pet_name": "Pet Name",
   "booking_type": "Appointment Type",
   "booking_date": "Preferred Date",
