@@ -4,6 +4,7 @@ import { useState, useEffect, use } from 'react'
 import { useRouter } from 'next/navigation'
 import { Post } from '@/types/content'
 import { ImageUpload } from '@/components/image-upload'
+import { RichTextEditor } from '@/components/rich-text-editor'
 
 export default function EditPostPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params)
@@ -151,11 +152,10 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
             <label className="block text-sm font-medium text-black dark:text-white mb-2">
               Content <span className="text-red-500">*</span>
             </label>
-            <textarea
-              required
+            <RichTextEditor
               value={post.content}
-              onChange={(e) => setPost({ ...post, content: e.target.value })}
-              rows={15}
+              onChange={(content) => setPost({ ...post, content })}
+              placeholder="Write your post content here..."
               className="w-full rounded-lg border border-black/10 bg-transparent px-4 py-3 text-black focus:border-black focus:outline-none dark:border-white/10 dark:text-white dark:focus:border-white font-mono text-sm"
             />
           </div>
