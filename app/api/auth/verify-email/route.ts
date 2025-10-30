@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { verifyClientEmail, resendVerificationToken } from '@/lib/email-verification'
 import { sendVerificationEmail } from '@/lib/email'
-import { getClientById } from '@/lib/redis'
+import { getClient } from '@/lib/redis'
 
 // GET - Verify email with token
 export async function GET(request: NextRequest) {
@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Get client details
-    const client = await getClientById(clientId)
+    const client = await getClient(clientId)
 
     if (!client) {
       return NextResponse.json({ error: 'Client not found' }, { status: 404 })
