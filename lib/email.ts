@@ -189,6 +189,69 @@ export async function sendAppointmentNotification(data: AppointmentData) {
 }
 
 /**
+ * Send email verification link
+ */
+export async function sendVerificationEmail(
+  clientEmail: string,
+  clientName: string,
+  verificationToken: string
+) {
+  try {
+    const verificationUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/verify-email?token=${verificationToken}`
+
+    const { error } = await resend.emails.send({
+      from: FROM_EMAIL,
+      to: clientEmail,
+      subject: 'Verify Your Email - Continuum Clinic',
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #000;">Verify Your Email Address</h2>
+
+          <p>Dear ${clientName},</p>
+
+          <p>Thank you for registering with Continuum Clinic. To complete your registration, please verify your email address by clicking the button below:</p>
+
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${verificationUrl}"
+               style="background-color: #000; color: #fff; padding: 14px 28px; text-decoration: none; border-radius: 4px; display: inline-block;">
+              Verify Email Address
+            </a>
+          </div>
+
+          <p style="color: #666; font-size: 14px;">
+            Or copy and paste this link into your browser:<br />
+            <a href="${verificationUrl}" style="color: #000; word-break: break-all;">${verificationUrl}</a>
+          </p>
+
+          <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <p style="margin: 0; color: #666; font-size: 14px;">
+              <strong>Important:</strong> This verification link will expire in 24 hours. If you did not create this account, please ignore this email.
+            </p>
+          </div>
+
+          <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;" />
+
+          <p style="color: #666; font-size: 12px;">
+            Continuum Clinic<br />
+            12 Upper Wimpole Street, London W1G 6LW<br />
+            ${TO_EMAIL} | +44 20 1234 5678
+          </p>
+        </div>
+      `
+    })
+
+    if (error) {
+      throw error
+    }
+
+    return { success: true }
+  } catch (error) {
+    console.error('Failed to send verification email:', error)
+    throw new Error('Failed to send verification email')
+  }
+}
+
+/**
  * Send client registration welcome email
  */
 export async function sendWelcomeEmail(clientName: string, clientEmail: string) {

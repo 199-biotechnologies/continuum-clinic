@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { verifyPassword, setClientSessionData, type ClientSession } from '@/lib/auth'
 import { getClientByEmail, getClientPasswordHash } from '@/lib/redis'
+import { isEmailVerified } from '@/lib/email-verification'
 
 const loginSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -38,6 +39,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: 'Invalid credentials' },
         { status: 401 }
+      )
+    }
+
+    // Check if email is verified
+    const verified = await isEmailVerified(client.id)
+    if (!verified) {
+      return NextResponse.json(
+        {
+          error: 'Please verify your email address before logging in.',
+          requiresVerification: true
+        },
+        { status: 403 }
       )
     }
 

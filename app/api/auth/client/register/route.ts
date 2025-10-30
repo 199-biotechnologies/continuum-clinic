@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
-import { hashPassword, setClientSessionData, type ClientSession } from '@/lib/auth'
+import { hashPassword } from '@/lib/auth'
 import { getClientByEmail, setClient, setClientEmailMapping, setClientPasswordHash } from '@/lib/redis'
+import { createVerificationToken } from '@/lib/email-verification'
+import { sendVerificationEmail } from '@/lib/email'
 
 const registerSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -44,25 +46,20 @@ export async function POST(request: NextRequest) {
     await setClientEmailMapping(email, clientId)
     await setClientPasswordHash(clientId, passwordHash)
 
-    // Create session
-    const session: ClientSession = {
-      clientId,
-      email,
-      role: 'client',
-      createdAt: Date.now()
-    }
+    // Create verification token
+    const verificationToken = await createVerificationToken(clientId, email)
 
-    await setClientSessionData(session)
+    // Send verification email
+    await sendVerificationEmail(
+      email,
+      `${firstName} ${lastName}`,
+      verificationToken.token
+    )
 
     return NextResponse.json({
       success: true,
-      user: {
-        id: clientId,
-        email,
-        firstName,
-        lastName,
-        role: 'client'
-      }
+      message: 'Registration successful. Please check your email to verify your account.',
+      emailSent: true
     })
   } catch (error) {
     console.error('Client registration error:', error)
