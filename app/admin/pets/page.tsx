@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { AdminSidebar } from '@/components/admin/sidebar'
 import { Plus, Search, Edit, Trash2, Eye, X, Check, AlertCircle, Dog } from 'lucide-react'
 
@@ -41,6 +42,7 @@ interface PetWithClient extends Pet {
 type ModalMode = 'create' | 'edit' | 'view' | null
 
 export default function AdminPetsPage() {
+  const t = useTranslations()
   const router = useRouter()
   const [pets, setPets] = useState<PetWithClient[]>([])
   const [clients, setClients] = useState<Client[]>([])
@@ -305,7 +307,7 @@ export default function AdminPetsPage() {
           {/* Header */}
           <div className="flex justify-between items-center mb-8">
             <div>
-              <h1 className="text-3xl font-light">Pets</h1>
+              <h1 className="text-3xl font-light">{t('admin_pets_title')}</h1>
               <p className="text-sm text-muted-foreground mt-1">
                 Manage pet profiles and medical records
               </p>
@@ -315,7 +317,7 @@ export default function AdminPetsPage() {
               className="px-4 py-2 bg-foreground text-background rounded-md text-sm font-light flex items-center gap-2 hover:bg-foreground/90 transition-colors"
             >
               <Plus className="w-4 h-4" />
-              Add New Pet
+              {t('admin_pets_add')}
             </button>
           </div>
 
@@ -341,7 +343,7 @@ export default function AdminPetsPage() {
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <input
                   type="text"
-                  placeholder="Search by name, breed, or owner..."
+                  placeholder={t('admin_pets_search')}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full pl-10 pr-4 py-2 border border-border rounded-md text-sm font-light focus:outline-none focus:ring-2 focus:ring-foreground bg-background"
@@ -355,9 +357,9 @@ export default function AdminPetsPage() {
                 className="px-4 py-2 border border-border rounded-md text-sm font-light focus:outline-none focus:ring-2 focus:ring-foreground bg-background"
               >
                 <option value="all">All Species</option>
-                <option value="dog">Dogs</option>
-                <option value="cat">Cats</option>
-                <option value="other">Other</option>
+                <option value="dog">{t('admin_pets_dogs')}</option>
+                <option value="cat">{t('admin_pets_cats')}</option>
+                <option value="other">{t('species_other')}</option>
               </select>
 
               {/* Client Filter */}
@@ -380,13 +382,13 @@ export default function AdminPetsPage() {
           {loading ? (
             <div className="border rounded-lg p-12 bg-card text-center">
               <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-foreground"></div>
-              <p className="mt-4 text-sm text-muted-foreground">Loading pets...</p>
+              <p className="mt-4 text-sm text-muted-foreground">{t('admin_loading')}</p>
             </div>
           ) : filteredPets.length === 0 ? (
             <div className="border rounded-lg p-12 bg-card text-center">
               <Dog className="w-12 h-12 mx-auto text-muted-foreground/50 mb-4" />
               <p className="text-sm text-muted-foreground">
-                {pets.length === 0 ? 'No pets registered yet.' : 'No pets match your filters.'}
+                {pets.length === 0 ? t('admin_pets_none') : t('admin_pets_none_search')}
               </p>
             </div>
           ) : (
@@ -396,25 +398,25 @@ export default function AdminPetsPage() {
                   <thead className="bg-muted/5 border-b border-border">
                     <tr>
                       <th className="text-left px-6 py-3 text-xs font-light text-muted-foreground uppercase tracking-wider">
-                        Pet Name
+                        {t('admin_pets_name')}
                       </th>
                       <th className="text-left px-6 py-3 text-xs font-light text-muted-foreground uppercase tracking-wider">
-                        Species
+                        {t('admin_pets_species')}
                       </th>
                       <th className="text-left px-6 py-3 text-xs font-light text-muted-foreground uppercase tracking-wider">
-                        Breed
+                        {t('admin_pets_breed')}
                       </th>
                       <th className="text-left px-6 py-3 text-xs font-light text-muted-foreground uppercase tracking-wider">
-                        Age
+                        {t('admin_pets_age')}
                       </th>
                       <th className="text-left px-6 py-3 text-xs font-light text-muted-foreground uppercase tracking-wider">
-                        Owner
+                        {t('admin_pets_owner')}
                       </th>
                       <th className="text-left px-6 py-3 text-xs font-light text-muted-foreground uppercase tracking-wider">
                         Status
                       </th>
                       <th className="text-right px-6 py-3 text-xs font-light text-muted-foreground uppercase tracking-wider">
-                        Actions
+                        {t('admin_pets_actions')}
                       </th>
                     </tr>
                   </thead>
@@ -504,7 +506,7 @@ export default function AdminPetsPage() {
           <div className="bg-card rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="sticky top-0 bg-card border-b border-border px-6 py-4 flex justify-between items-center">
               <h2 className="text-xl font-light">
-                {modalMode === 'create' ? 'Add New Pet' : 'Edit Pet'}
+                {modalMode === 'create' ? t('admin_pets_add') : t('admin_pets_edit')}
               </h2>
               <button onClick={closeModal} className="p-2 hover:bg-muted/20 rounded-md">
                 <X className="w-5 h-5" />
@@ -530,7 +532,7 @@ export default function AdminPetsPage() {
                 {/* Pet Name */}
                 <div>
                   <label className="block text-sm font-light mb-2">
-                    Pet Name <span className="text-red-500">*</span>
+                    {t('admin_pets_name')} <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
@@ -544,7 +546,7 @@ export default function AdminPetsPage() {
                 {/* Species */}
                 <div>
                   <label className="block text-sm font-light mb-2">
-                    Species <span className="text-red-500">*</span>
+                    {t('admin_pets_species')} <span className="text-red-500">*</span>
                   </label>
                   <select
                     value={formData.species}
@@ -552,16 +554,16 @@ export default function AdminPetsPage() {
                     className="w-full px-4 py-2 border border-border rounded-md text-sm font-light focus:outline-none focus:ring-2 focus:ring-foreground bg-background"
                     required
                   >
-                    <option value="dog">Dog</option>
-                    <option value="cat">Cat</option>
-                    <option value="other">Other</option>
+                    <option value="dog">{t('species_dog')}</option>
+                    <option value="cat">{t('species_cat')}</option>
+                    <option value="other">{t('species_other')}</option>
                   </select>
                 </div>
 
                 {/* Breed */}
                 <div>
                   <label className="block text-sm font-light mb-2">
-                    Breed <span className="text-red-500">*</span>
+                    {t('admin_pets_breed')} <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
@@ -575,7 +577,7 @@ export default function AdminPetsPage() {
                 {/* Date of Birth */}
                 <div>
                   <label className="block text-sm font-light mb-2">
-                    Date of Birth <span className="text-red-500">*</span>
+                    {t('admin_pets_date_of_birth')} <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="date"
@@ -589,7 +591,7 @@ export default function AdminPetsPage() {
                 {/* Weight */}
                 <div>
                   <label className="block text-sm font-light mb-2">
-                    Weight (kg) <span className="text-red-500">*</span>
+                    {t('admin_pets_weight')} <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="number"
@@ -604,7 +606,7 @@ export default function AdminPetsPage() {
                 {/* Sex */}
                 <div>
                   <label className="block text-sm font-light mb-2">
-                    Sex <span className="text-red-500">*</span>
+                    {t('admin_pets_sex')} <span className="text-red-500">*</span>
                   </label>
                   <select
                     value={formData.sex}
@@ -612,17 +614,17 @@ export default function AdminPetsPage() {
                     className="w-full px-4 py-2 border border-border rounded-md text-sm font-light focus:outline-none focus:ring-2 focus:ring-foreground bg-background"
                     required
                   >
-                    <option value="male">Male</option>
-                    <option value="female">Female</option>
-                    <option value="neutered">Neutered</option>
-                    <option value="spayed">Spayed</option>
+                    <option value="male">{t('admin_pets_sex_male')}</option>
+                    <option value="female">{t('admin_pets_sex_female')}</option>
+                    <option value="neutered">{t('admin_pets_sex_neutered')}</option>
+                    <option value="spayed">{t('admin_pets_sex_spayed')}</option>
                   </select>
                 </div>
 
                 {/* Owner */}
                 <div className="col-span-2">
                   <label className="block text-sm font-light mb-2">
-                    Owner <span className="text-red-500">*</span>
+                    {t('admin_pets_owner')} <span className="text-red-500">*</span>
                   </label>
                   <select
                     value={formData.clientId}
@@ -630,7 +632,7 @@ export default function AdminPetsPage() {
                     className="w-full px-4 py-2 border border-border rounded-md text-sm font-light focus:outline-none focus:ring-2 focus:ring-foreground bg-background"
                     required
                   >
-                    <option value="">Select owner...</option>
+                    <option value="">{t('admin_pets_select_client')}</option>
                     {clients.map(client => (
                       <option key={client.id} value={client.id}>
                         {client.firstName} {client.lastName} ({client.email})
@@ -642,7 +644,7 @@ export default function AdminPetsPage() {
                 {/* Microchip ID */}
                 <div className="col-span-2">
                   <label className="block text-sm font-light mb-2">
-                    Microchip ID
+                    {t('admin_pets_microchip_id')}
                   </label>
                   <input
                     type="text"
@@ -689,7 +691,7 @@ export default function AdminPetsPage() {
 
               {/* Notes */}
               <div>
-                <label className="block text-sm font-light mb-2">Notes</label>
+                <label className="block text-sm font-light mb-2">{t('admin_pets_notes')}</label>
                 <textarea
                   value={formData.notes}
                   onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
@@ -706,13 +708,13 @@ export default function AdminPetsPage() {
                   onClick={closeModal}
                   className="px-4 py-2 border border-border rounded-md text-sm font-light hover:bg-muted/10 transition-colors"
                 >
-                  Cancel
+                  {t('common_cancel')}
                 </button>
                 <button
                   type="submit"
                   className="px-4 py-2 bg-foreground text-background rounded-md text-sm font-light hover:bg-foreground/90 transition-colors"
                 >
-                  {modalMode === 'create' ? 'Create Pet' : 'Update Pet'}
+                  {modalMode === 'create' ? t('admin_modal_create') : t('admin_modal_update')}
                 </button>
               </div>
             </form>
@@ -746,33 +748,33 @@ export default function AdminPetsPage() {
               {/* Basic Info */}
               <div className="grid grid-cols-2 gap-6">
                 <div>
-                  <label className="text-xs text-muted-foreground uppercase tracking-wider">Name</label>
+                  <label className="text-xs text-muted-foreground uppercase tracking-wider">{t('admin_pets_name')}</label>
                   <p className="text-base font-light mt-1">{selectedPet.name}</p>
                 </div>
                 <div>
-                  <label className="text-xs text-muted-foreground uppercase tracking-wider">Species</label>
+                  <label className="text-xs text-muted-foreground uppercase tracking-wider">{t('admin_pets_species')}</label>
                   <p className="text-base font-light mt-1 capitalize">{selectedPet.species}</p>
                 </div>
                 <div>
-                  <label className="text-xs text-muted-foreground uppercase tracking-wider">Breed</label>
+                  <label className="text-xs text-muted-foreground uppercase tracking-wider">{t('admin_pets_breed')}</label>
                   <p className="text-base font-light mt-1">{selectedPet.breed}</p>
                 </div>
                 <div>
-                  <label className="text-xs text-muted-foreground uppercase tracking-wider">Age</label>
+                  <label className="text-xs text-muted-foreground uppercase tracking-wider">{t('admin_pets_age')}</label>
                   <p className="text-base font-light mt-1">{calculateAge(selectedPet.dateOfBirth)}</p>
                 </div>
                 <div>
-                  <label className="text-xs text-muted-foreground uppercase tracking-wider">Date of Birth</label>
+                  <label className="text-xs text-muted-foreground uppercase tracking-wider">{t('admin_pets_date_of_birth')}</label>
                   <p className="text-base font-light mt-1">
                     {new Date(selectedPet.dateOfBirth).toLocaleDateString('en-GB')}
                   </p>
                 </div>
                 <div>
-                  <label className="text-xs text-muted-foreground uppercase tracking-wider">Weight</label>
+                  <label className="text-xs text-muted-foreground uppercase tracking-wider">{t('admin_pets_weight')}</label>
                   <p className="text-base font-light mt-1">{selectedPet.weight} kg</p>
                 </div>
                 <div>
-                  <label className="text-xs text-muted-foreground uppercase tracking-wider">Sex</label>
+                  <label className="text-xs text-muted-foreground uppercase tracking-wider">{t('admin_pets_sex')}</label>
                   <p className="text-base font-light mt-1 capitalize">{selectedPet.sex}</p>
                 </div>
                 <div>
@@ -785,7 +787,7 @@ export default function AdminPetsPage() {
 
               {/* Owner */}
               <div className="border-t border-border pt-6">
-                <label className="text-xs text-muted-foreground uppercase tracking-wider">Owner</label>
+                <label className="text-xs text-muted-foreground uppercase tracking-wider">{t('admin_pets_owner')}</label>
                 <div className="mt-2">
                   <p className="text-base font-light">
                     {pets.find(p => p.id === selectedPet.id)?.clientName}
@@ -799,7 +801,7 @@ export default function AdminPetsPage() {
               {/* Microchip */}
               {selectedPet.microchipId && (
                 <div className="border-t border-border pt-6">
-                  <label className="text-xs text-muted-foreground uppercase tracking-wider">Microchip ID</label>
+                  <label className="text-xs text-muted-foreground uppercase tracking-wider">{t('admin_pets_microchip_id')}</label>
                   <p className="text-base font-light mt-2">{selectedPet.microchipId}</p>
                 </div>
               )}
@@ -832,14 +834,14 @@ export default function AdminPetsPage() {
               {/* Notes */}
               {selectedPet.notes && (
                 <div className="border-t border-border pt-6">
-                  <label className="text-xs text-muted-foreground uppercase tracking-wider">Notes</label>
+                  <label className="text-xs text-muted-foreground uppercase tracking-wider">{t('admin_pets_notes')}</label>
                   <p className="text-base font-light mt-2 whitespace-pre-wrap">{selectedPet.notes}</p>
                 </div>
               )}
 
               {/* Health Records Placeholder */}
               <div className="border-t border-border pt-6">
-                <label className="text-xs text-muted-foreground uppercase tracking-wider">Health Records</label>
+                <label className="text-xs text-muted-foreground uppercase tracking-wider">{t('admin_health_records')}</label>
                 <div className="mt-4 p-4 border border-dashed border-border rounded-md text-center">
                   <p className="text-sm text-muted-foreground">
                     Health records feature coming soon
@@ -863,13 +865,13 @@ export default function AdminPetsPage() {
                   onClick={closeModal}
                   className="px-4 py-2 border border-border rounded-md text-sm font-light hover:bg-muted/10 transition-colors"
                 >
-                  Close
+                  {t('admin_modal_close')}
                 </button>
                 <button
                   onClick={() => openModal('edit', selectedPet)}
                   className="px-4 py-2 bg-foreground text-background rounded-md text-sm font-light hover:bg-foreground/90 transition-colors"
                 >
-                  Edit Pet
+                  {t('common_edit')}
                 </button>
               </div>
             </div>
@@ -886,23 +888,22 @@ export default function AdminPetsPage() {
                 <AlertCircle className="w-6 h-6 text-red-600" />
               </div>
               <div className="flex-1">
-                <h3 className="text-lg font-light mb-2">Delete Pet</h3>
+                <h3 className="text-lg font-light mb-2">{t('admin_pets_delete')}</h3>
                 <p className="text-sm text-muted-foreground mb-6">
-                  Are you sure you want to delete this pet? This action cannot be undone and will
-                  remove all associated health records and appointments.
+                  {t('admin_pets_confirm_delete')} {t('admin_pets_confirm_delete_warning')}
                 </p>
                 <div className="flex justify-end gap-3">
                   <button
                     onClick={() => setDeleteConfirm(null)}
                     className="px-4 py-2 border border-border rounded-md text-sm font-light hover:bg-muted/10 transition-colors"
                   >
-                    Cancel
+                    {t('common_cancel')}
                   </button>
                   <button
                     onClick={() => handleDelete(deleteConfirm)}
                     className="px-4 py-2 bg-red-600 text-white rounded-md text-sm font-light hover:bg-red-700 transition-colors"
                   >
-                    Delete Pet
+                    {t('common_delete')}
                   </button>
                 </div>
               </div>

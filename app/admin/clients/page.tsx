@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { AdminSidebar } from '@/components/admin/sidebar'
 
 interface Client {
@@ -36,6 +37,7 @@ interface ClientWithMetadata extends Client {
 }
 
 export default function AdminClientsPage() {
+  const t = useTranslations()
   const router = useRouter()
   const [clients, setClients] = useState<ClientWithMetadata[]>([])
   const [filteredClients, setFilteredClients] = useState<ClientWithMetadata[]>([])
@@ -343,12 +345,12 @@ export default function AdminClientsPage() {
         <div className="max-w-7xl mx-auto">
           {/* Header */}
           <div className="flex justify-between items-center mb-8">
-            <h1 className="text-3xl font-light">Clients</h1>
+            <h1 className="text-3xl font-light">{t('admin_clients_title')}</h1>
             <button
               onClick={openCreateModal}
               className="px-4 py-2 bg-foreground text-background rounded-md text-sm font-light hover:opacity-80 transition-opacity"
             >
-              Add New Client
+              {t('admin_add_new')}
             </button>
           </div>
 
@@ -356,7 +358,7 @@ export default function AdminClientsPage() {
           <div className="mb-6">
             <input
               type="text"
-              placeholder="Search by name, email, or phone..."
+              placeholder={t('admin_clients_search')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full px-4 py-2 border rounded-md bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-foreground"
@@ -366,7 +368,7 @@ export default function AdminClientsPage() {
           {/* Loading State */}
           {loading && (
             <div className="border rounded-lg p-12 bg-card text-center">
-              <p className="text-sm text-muted-foreground">Loading clients...</p>
+              <p className="text-sm text-muted-foreground">{t('admin_loading')}</p>
             </div>
           )}
 
@@ -386,12 +388,12 @@ export default function AdminClientsPage() {
           {/* Empty State */}
           {!loading && !error && filteredClients.length === 0 && !searchQuery && (
             <div className="border rounded-lg p-12 bg-card text-center">
-              <p className="text-sm text-muted-foreground mb-4">No clients yet. Add your first client to get started.</p>
+              <p className="text-sm text-muted-foreground mb-4">{t('admin_no_results')}</p>
               <button
                 onClick={openCreateModal}
                 className="px-4 py-2 bg-foreground text-background rounded-md text-sm font-light"
               >
-                Add First Client
+                {t('admin_add_new')}
               </button>
             </div>
           )}
@@ -399,7 +401,7 @@ export default function AdminClientsPage() {
           {/* No Search Results */}
           {!loading && !error && filteredClients.length === 0 && searchQuery && (
             <div className="border rounded-lg p-6 bg-card text-center">
-              <p className="text-sm text-muted-foreground">No clients found matching "{searchQuery}"</p>
+              <p className="text-sm text-muted-foreground">{t('admin_no_results')}</p>
             </div>
           )}
 
@@ -410,12 +412,12 @@ export default function AdminClientsPage() {
                 <table className="w-full">
                   <thead>
                     <tr className="border-b bg-muted/50">
-                      <th className="px-6 py-3 text-left text-xs font-light text-muted-foreground uppercase tracking-wider">Name</th>
-                      <th className="px-6 py-3 text-left text-xs font-light text-muted-foreground uppercase tracking-wider">Email</th>
-                      <th className="px-6 py-3 text-left text-xs font-light text-muted-foreground uppercase tracking-wider">Phone</th>
-                      <th className="px-6 py-3 text-left text-xs font-light text-muted-foreground uppercase tracking-wider">Pets</th>
+                      <th className="px-6 py-3 text-left text-xs font-light text-muted-foreground uppercase tracking-wider">{t('admin_client_name')}</th>
+                      <th className="px-6 py-3 text-left text-xs font-light text-muted-foreground uppercase tracking-wider">{t('admin_client_email')}</th>
+                      <th className="px-6 py-3 text-left text-xs font-light text-muted-foreground uppercase tracking-wider">{t('admin_client_phone')}</th>
+                      <th className="px-6 py-3 text-left text-xs font-light text-muted-foreground uppercase tracking-wider">{t('admin_client_pets')}</th>
                       <th className="px-6 py-3 text-left text-xs font-light text-muted-foreground uppercase tracking-wider">Last Visit</th>
-                      <th className="px-6 py-3 text-right text-xs font-light text-muted-foreground uppercase tracking-wider">Actions</th>
+                      <th className="px-6 py-3 text-right text-xs font-light text-muted-foreground uppercase tracking-wider">{t('admin_client_actions')}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y">
@@ -448,7 +450,7 @@ export default function AdminClientsPage() {
                             }}
                             className="text-foreground hover:opacity-70 mr-4"
                           >
-                            Edit
+                            {t('common_edit')}
                           </button>
                           <button
                             onClick={(e) => {
@@ -457,7 +459,7 @@ export default function AdminClientsPage() {
                             }}
                             className="text-red-600 hover:opacity-70"
                           >
-                            Delete
+                            {t('common_delete')}
                           </button>
                         </td>
                       </tr>
@@ -475,14 +477,14 @@ export default function AdminClientsPage() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
           <div className="bg-background border rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b">
-              <h2 className="text-2xl font-light">Add New Client</h2>
+              <h2 className="text-2xl font-light">{t('admin_create_client')}</h2>
             </div>
 
             <div className="p-6 space-y-4">
               {/* First Name */}
               <div>
                 <label className="block text-sm font-light mb-2">
-                  First Name <span className="text-red-500">*</span>
+                  {t('admin_client_first_name')} <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -498,7 +500,7 @@ export default function AdminClientsPage() {
               {/* Last Name */}
               <div>
                 <label className="block text-sm font-light mb-2">
-                  Last Name <span className="text-red-500">*</span>
+                  {t('admin_client_last_name')} <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -514,7 +516,7 @@ export default function AdminClientsPage() {
               {/* Email */}
               <div>
                 <label className="block text-sm font-light mb-2">
-                  Email <span className="text-red-500">*</span>
+                  {t('admin_client_email')} <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="email"
@@ -530,7 +532,7 @@ export default function AdminClientsPage() {
               {/* Phone */}
               <div>
                 <label className="block text-sm font-light mb-2">
-                  Phone
+                  {t('admin_client_phone')}
                 </label>
                 <input
                   type="tel"
@@ -614,14 +616,14 @@ export default function AdminClientsPage() {
                 disabled={isSubmitting}
                 className="px-4 py-2 border rounded-md text-sm font-light hover:bg-muted transition-colors disabled:opacity-50"
               >
-                Cancel
+                {t('admin_cancel_action')}
               </button>
               <button
                 onClick={handleCreate}
                 disabled={isSubmitting}
                 className="px-4 py-2 bg-foreground text-background rounded-md text-sm font-light hover:opacity-80 transition-opacity disabled:opacity-50"
               >
-                {isSubmitting ? 'Creating...' : 'Create Client'}
+                {isSubmitting ? t('admin_creating') : t('admin_create_client')}
               </button>
             </div>
           </div>
@@ -633,7 +635,7 @@ export default function AdminClientsPage() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
           <div className="bg-background border rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b">
-              <h2 className="text-2xl font-light">Edit Client</h2>
+              <h2 className="text-2xl font-light">{t('admin_edit_client')}</h2>
             </div>
 
             <div className="p-6 space-y-4">
@@ -766,14 +768,14 @@ export default function AdminClientsPage() {
                 disabled={isSubmitting}
                 className="px-4 py-2 border rounded-md text-sm font-light hover:bg-muted transition-colors disabled:opacity-50"
               >
-                Cancel
+                {t('admin_cancel_action')}
               </button>
               <button
                 onClick={handleEdit}
                 disabled={isSubmitting}
                 className="px-4 py-2 bg-foreground text-background rounded-md text-sm font-light hover:opacity-80 transition-opacity disabled:opacity-50"
               >
-                {isSubmitting ? 'Saving...' : 'Save Changes'}
+                {isSubmitting ? t('admin_saving') : t('admin_modal_save')}
               </button>
             </div>
           </div>
@@ -785,12 +787,12 @@ export default function AdminClientsPage() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
           <div className="bg-background border rounded-lg max-w-md w-full">
             <div className="p-6 border-b">
-              <h2 className="text-2xl font-light">Delete Client</h2>
+              <h2 className="text-2xl font-light">{t('admin_delete_client')}</h2>
             </div>
 
             <div className="p-6">
               <p className="text-sm text-muted-foreground mb-4">
-                Are you sure you want to delete {selectedClient.firstName} {selectedClient.lastName}?
+                {t('admin_delete_client_confirm')}
               </p>
               <p className="text-sm text-red-500">
                 This action cannot be undone. All associated data will be permanently deleted.
@@ -806,14 +808,14 @@ export default function AdminClientsPage() {
                 disabled={isSubmitting}
                 className="px-4 py-2 border rounded-md text-sm font-light hover:bg-muted transition-colors disabled:opacity-50"
               >
-                Cancel
+                {t('admin_cancel_action')}
               </button>
               <button
                 onClick={handleDelete}
                 disabled={isSubmitting}
                 className="px-4 py-2 bg-red-600 text-white rounded-md text-sm font-light hover:bg-red-700 transition-colors disabled:opacity-50"
               >
-                {isSubmitting ? 'Deleting...' : 'Delete Client'}
+                {isSubmitting ? t('admin_deleting') : t('admin_delete_client')}
               </button>
             </div>
           </div>
@@ -832,7 +834,7 @@ export default function AdminClientsPage() {
                 onClick={() => setIsViewModalOpen(false)}
                 className="text-muted-foreground hover:text-foreground"
               >
-                Close
+                {t('admin_modal_close')}
               </button>
             </div>
 
@@ -930,7 +932,7 @@ export default function AdminClientsPage() {
                 }}
                 className="px-4 py-2 bg-foreground text-background rounded-md text-sm font-light hover:opacity-80 transition-opacity"
               >
-                Edit Client
+                {t('admin_edit_client')}
               </button>
             </div>
           </div>

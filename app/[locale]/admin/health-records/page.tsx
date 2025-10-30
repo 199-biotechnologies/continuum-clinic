@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { AdminLayout } from '@/components/admin/admin-layout'
 import { Plus, Search, Trash2, Edit, X } from 'lucide-react'
 
@@ -29,6 +30,7 @@ interface HealthRecord {
 }
 
 export default function AdminHealthRecordsPage() {
+  const t = useTranslations()
   const [records, setRecords] = useState<HealthRecord[]>([])
   const [pets, setPets] = useState<Pet[]>([])
   const [loading, setLoading] = useState(true)
@@ -236,22 +238,22 @@ export default function AdminHealthRecordsPage() {
       className="flex items-center gap-2 px-4 py-2 bg-foreground text-background rounded-md text-sm font-light hover:opacity-90 transition-opacity"
     >
       <Plus className="w-4 h-4" />
-      Add Health Record
+      {t('admin_add_new')}
     </button>
   )
 
   if (loading) {
     return (
-      <AdminLayout title="Health Records" actions={actions}>
+      <AdminLayout title={t('admin_health_records_title')} actions={actions}>
         <div className="flex items-center justify-center py-12">
-          <p className="text-muted-foreground">Loading health records...</p>
+          <p className="text-muted-foreground">{t('admin_loading')}</p>
         </div>
       </AdminLayout>
     )
   }
 
   return (
-    <AdminLayout title="Health Records" actions={actions}>
+    <AdminLayout title={t('admin_health_records_title')} actions={actions}>
       {/* Search */}
       <div className="mb-6">
         <div className="relative max-w-md">
@@ -270,7 +272,7 @@ export default function AdminHealthRecordsPage() {
       {filteredRecords.length === 0 ? (
         <div className="text-center py-12 border border-border rounded-lg bg-card">
           <p className="text-lg font-extralight text-muted-foreground mb-4">
-            {searchQuery ? 'No health records match your search' : 'No health records yet'}
+            {t('admin_no_results')}
           </p>
           {!searchQuery && (
             <button
@@ -278,7 +280,7 @@ export default function AdminHealthRecordsPage() {
               className="inline-flex items-center gap-2 px-6 py-3 bg-foreground text-background rounded-md text-sm font-light hover:opacity-90 transition-opacity"
             >
               <Plus className="w-4 h-4" />
-              Add First Health Record
+              {t('admin_add_new')}
             </button>
           )}
         </div>
@@ -287,12 +289,12 @@ export default function AdminHealthRecordsPage() {
           <table className="w-full">
             <thead className="border-b border-border bg-muted/5">
               <tr>
-                <th className="px-4 py-3 text-left text-sm font-light">Pet</th>
-                <th className="px-4 py-3 text-left text-sm font-light">Type</th>
-                <th className="px-4 py-3 text-left text-sm font-light">Date</th>
-                <th className="px-4 py-3 text-left text-sm font-light">Veterinarian</th>
-                <th className="px-4 py-3 text-left text-sm font-light">Diagnosis</th>
-                <th className="px-4 py-3 text-right text-sm font-light">Actions</th>
+                <th className="px-4 py-3 text-left text-sm font-light">{t('admin_record_pet')}</th>
+                <th className="px-4 py-3 text-left text-sm font-light">{t('admin_record_type')}</th>
+                <th className="px-4 py-3 text-left text-sm font-light">{t('admin_record_date')}</th>
+                <th className="px-4 py-3 text-left text-sm font-light">{t('admin_record_veterinarian')}</th>
+                <th className="px-4 py-3 text-left text-sm font-light">{t('admin_record_diagnosis')}</th>
+                <th className="px-4 py-3 text-right text-sm font-light">{t('common_actions')}</th>
               </tr>
             </thead>
             <tbody>
@@ -339,14 +341,14 @@ export default function AdminHealthRecordsPage() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-card rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between p-6 border-b border-border">
-              <h2 className="text-xl font-light">Add Health Record</h2>
+              <h2 className="text-xl font-light">{t('admin_create_record')}</h2>
               <button onClick={() => setShowCreateModal(false)}>
                 <X className="w-5 h-5" />
               </button>
             </div>
             <form onSubmit={handleCreate} className="p-6 space-y-4">
               <div>
-                <label className="block text-sm font-light mb-2">Pet *</label>
+                <label className="block text-sm font-light mb-2">{t('admin_record_pet')} *</label>
                 <select
                   required
                   value={formData.petId}
@@ -364,7 +366,7 @@ export default function AdminHealthRecordsPage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-light mb-2">Record Type *</label>
+                  <label className="block text-sm font-light mb-2">{t('admin_record_type')} *</label>
                   <input
                     type="text"
                     required
@@ -375,7 +377,7 @@ export default function AdminHealthRecordsPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-light mb-2">Date *</label>
+                  <label className="block text-sm font-light mb-2">{t('admin_record_date')} *</label>
                   <input
                     type="date"
                     required
@@ -387,7 +389,7 @@ export default function AdminHealthRecordsPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-light mb-2">Veterinarian</label>
+                <label className="block text-sm font-light mb-2">{t('admin_record_veterinarian')}</label>
                 <input
                   type="text"
                   value={formData.veterinarian}
@@ -397,7 +399,7 @@ export default function AdminHealthRecordsPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-light mb-2">Diagnosis</label>
+                <label className="block text-sm font-light mb-2">{t('admin_record_diagnosis')}</label>
                 <input
                   type="text"
                   value={formData.diagnosis}
@@ -407,9 +409,7 @@ export default function AdminHealthRecordsPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-light mb-2">
-                  Medications (comma-separated)
-                </label>
+                <label className="block text-sm font-light mb-2">{t('admin_record_medications')}</label>
                 <input
                   type="text"
                   value={formData.medications}
@@ -420,7 +420,7 @@ export default function AdminHealthRecordsPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-light mb-2">Notes</label>
+                <label className="block text-sm font-light mb-2">{t('admin_record_notes')}</label>
                 <textarea
                   rows={4}
                   value={formData.notes}
@@ -430,7 +430,7 @@ export default function AdminHealthRecordsPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-light mb-2">Follow-up Date</label>
+                <label className="block text-sm font-light mb-2">{t('admin_record_followup')}</label>
                 <input
                   type="date"
                   value={formData.followUpDate}
@@ -445,14 +445,14 @@ export default function AdminHealthRecordsPage() {
                   onClick={() => setShowCreateModal(false)}
                   className="px-6 py-2 border border-border rounded-md text-sm font-light hover:bg-muted/10 transition-colors"
                 >
-                  Cancel
+                  {t('admin_cancel_action')}
                 </button>
                 <button
                   type="submit"
                   disabled={isSaving}
                   className="px-6 py-2 bg-foreground text-background rounded-md text-sm font-light hover:opacity-90 transition-opacity disabled:opacity-50"
                 >
-                  {isSaving ? 'Creating...' : 'Create Health Record'}
+                  {isSaving ? t('admin_creating') : t('admin_create_record')}
                 </button>
               </div>
             </form>
@@ -465,14 +465,14 @@ export default function AdminHealthRecordsPage() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-card rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between p-6 border-b border-border">
-              <h2 className="text-xl font-light">Edit Health Record</h2>
+              <h2 className="text-xl font-light">{t('admin_edit_record')}</h2>
               <button onClick={() => setShowEditModal(false)}>
                 <X className="w-5 h-5" />
               </button>
             </div>
             <form onSubmit={handleUpdate} className="p-6 space-y-4">
               <div>
-                <label className="block text-sm font-light mb-2">Pet *</label>
+                <label className="block text-sm font-light mb-2">{t('admin_record_pet')} *</label>
                 <select
                   required
                   value={formData.petId}
@@ -490,7 +490,7 @@ export default function AdminHealthRecordsPage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-light mb-2">Record Type *</label>
+                  <label className="block text-sm font-light mb-2">{t('admin_record_type')} *</label>
                   <input
                     type="text"
                     required
@@ -500,7 +500,7 @@ export default function AdminHealthRecordsPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-light mb-2">Date *</label>
+                  <label className="block text-sm font-light mb-2">{t('admin_record_date')} *</label>
                   <input
                     type="date"
                     required
@@ -512,7 +512,7 @@ export default function AdminHealthRecordsPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-light mb-2">Veterinarian</label>
+                <label className="block text-sm font-light mb-2">{t('admin_record_veterinarian')}</label>
                 <input
                   type="text"
                   value={formData.veterinarian}
@@ -522,7 +522,7 @@ export default function AdminHealthRecordsPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-light mb-2">Diagnosis</label>
+                <label className="block text-sm font-light mb-2">{t('admin_record_diagnosis')}</label>
                 <input
                   type="text"
                   value={formData.diagnosis}
@@ -532,9 +532,7 @@ export default function AdminHealthRecordsPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-light mb-2">
-                  Medications (comma-separated)
-                </label>
+                <label className="block text-sm font-light mb-2">{t('admin_record_medications')}</label>
                 <input
                   type="text"
                   value={formData.medications}
@@ -544,7 +542,7 @@ export default function AdminHealthRecordsPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-light mb-2">Notes</label>
+                <label className="block text-sm font-light mb-2">{t('admin_record_notes')}</label>
                 <textarea
                   rows={4}
                   value={formData.notes}
@@ -554,7 +552,7 @@ export default function AdminHealthRecordsPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-light mb-2">Follow-up Date</label>
+                <label className="block text-sm font-light mb-2">{t('admin_record_followup')}</label>
                 <input
                   type="date"
                   value={formData.followUpDate}
@@ -569,14 +567,14 @@ export default function AdminHealthRecordsPage() {
                   onClick={() => setShowEditModal(false)}
                   className="px-6 py-2 border border-border rounded-md text-sm font-light hover:bg-muted/10 transition-colors"
                 >
-                  Cancel
+                  {t('admin_cancel_action')}
                 </button>
                 <button
                   type="submit"
                   disabled={isSaving}
                   className="px-6 py-2 bg-foreground text-background rounded-md text-sm font-light hover:opacity-90 transition-opacity disabled:opacity-50"
                 >
-                  {isSaving ? 'Updating...' : 'Update Health Record'}
+                  {isSaving ? t('admin_saving') : t('admin_edit_record')}
                 </button>
               </div>
             </form>
@@ -589,7 +587,7 @@ export default function AdminHealthRecordsPage() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-card rounded-lg max-w-md w-full">
             <div className="p-6">
-              <h2 className="text-xl font-light mb-4">Delete Health Record</h2>
+              <h2 className="text-xl font-light mb-4">{t('admin_delete_record')}</h2>
               <p className="text-muted-foreground mb-6">
                 Are you sure you want to delete this health record for{' '}
                 <strong>{getPetName(selectedRecord.petId)}</strong>? This action cannot be
@@ -600,14 +598,14 @@ export default function AdminHealthRecordsPage() {
                   onClick={() => setShowDeleteModal(false)}
                   className="px-6 py-2 border border-border rounded-md text-sm font-light hover:bg-muted/10 transition-colors"
                 >
-                  Cancel
+                  {t('admin_cancel_action')}
                 </button>
                 <button
                   onClick={handleDelete}
                   disabled={isSaving}
                   className="px-6 py-2 bg-red-600 text-white rounded-md text-sm font-light hover:bg-red-700 transition-colors disabled:opacity-50"
                 >
-                  {isSaving ? 'Deleting...' : 'Delete Health Record'}
+                  {isSaving ? t('admin_deleting') : t('admin_delete_record')}
                 </button>
               </div>
             </div>

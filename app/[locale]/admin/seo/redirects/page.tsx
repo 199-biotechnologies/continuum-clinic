@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { AdminLayout } from '@/components/admin/admin-layout'
 import { Plus, Search, Trash2, Edit, X, ArrowRight } from 'lucide-react'
 
@@ -15,6 +16,7 @@ interface Redirect {
 }
 
 export default function AdminRedirectsPage() {
+  const t = useTranslations()
   const [redirects, setRedirects] = useState<Redirect[]>([])
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
@@ -159,34 +161,34 @@ export default function AdminRedirectsPage() {
       className="flex items-center gap-2 px-4 py-2 bg-foreground text-background rounded-md text-sm font-light hover:opacity-90 transition-opacity"
     >
       <Plus className="w-4 h-4" />
-      Add Redirect
+      {t('admin_add_new')}
     </button>
   )
 
   if (loading) {
     return (
-      <AdminLayout title="Redirects" actions={actions}>
+      <AdminLayout title={t('admin_redirects_title')} actions={actions}>
         <div className="flex items-center justify-center py-12">
-          <p className="text-muted-foreground">Loading redirects...</p>
+          <p className="text-muted-foreground">{t('admin_loading')}</p>
         </div>
       </AdminLayout>
     )
   }
 
   return (
-    <AdminLayout title="Redirects" actions={actions}>
+    <AdminLayout title={t('admin_redirects_title')} actions={actions}>
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <div className="p-6 border border-border rounded-lg bg-card">
-          <h3 className="text-sm font-light text-muted-foreground mb-2">Total Redirects</h3>
+          <h3 className="text-sm font-light text-muted-foreground mb-2">{t('admin_total_redirects')}</h3>
           <p className="text-3xl font-extralight">{redirects.length}</p>
         </div>
         <div className="p-6 border border-border rounded-lg bg-card">
-          <h3 className="text-sm font-light text-muted-foreground mb-2">Active</h3>
+          <h3 className="text-sm font-light text-muted-foreground mb-2">{t('admin_redirect_status_active')}</h3>
           <p className="text-3xl font-extralight">{activeRedirects}</p>
         </div>
         <div className="p-6 border border-border rounded-lg bg-card">
-          <h3 className="text-sm font-light text-muted-foreground mb-2">Permanent (301)</h3>
+          <h3 className="text-sm font-light text-muted-foreground mb-2">{t('admin_redirect_type_301')}</h3>
           <p className="text-3xl font-extralight">{redirect301Count}</p>
         </div>
       </div>
@@ -197,7 +199,7 @@ export default function AdminRedirectsPage() {
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <input
             type="text"
-            placeholder="Search redirects..."
+            placeholder={t('admin_search_redirects')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-10 pr-4 py-2 rounded-md border border-border bg-background"
@@ -210,7 +212,7 @@ export default function AdminRedirectsPage() {
         <div className="text-center py-16 border border-border rounded-lg bg-card">
           <ArrowRight className="w-12 h-12 mx-auto mb-4 text-muted-foreground opacity-50" />
           <p className="text-lg font-extralight text-muted-foreground mb-4">
-            {searchQuery ? 'No redirects match your search' : 'No redirects configured yet'}
+            {searchQuery ? t('admin_no_results') : t('admin_no_redirects')}
           </p>
           {!searchQuery && (
             <button
@@ -218,7 +220,7 @@ export default function AdminRedirectsPage() {
               className="inline-flex items-center gap-2 px-6 py-3 bg-foreground text-background rounded-md text-sm font-light hover:opacity-90 transition-opacity"
             >
               <Plus className="w-4 h-4" />
-              Add First Redirect
+              {t('admin_add_first_redirect')}
             </button>
           )}
         </div>
@@ -227,11 +229,11 @@ export default function AdminRedirectsPage() {
           <table className="w-full">
             <thead className="border-b border-border bg-muted/5">
               <tr>
-                <th className="px-4 py-3 text-left text-sm font-light">From</th>
-                <th className="px-4 py-3 text-left text-sm font-light">To</th>
-                <th className="px-4 py-3 text-left text-sm font-light">Type</th>
-                <th className="px-4 py-3 text-left text-sm font-light">Status</th>
-                <th className="px-4 py-3 text-right text-sm font-light">Actions</th>
+                <th className="px-4 py-3 text-left text-sm font-light">{t('admin_redirect_from')}</th>
+                <th className="px-4 py-3 text-left text-sm font-light">{t('admin_redirect_to')}</th>
+                <th className="px-4 py-3 text-left text-sm font-light">{t('admin_redirect_type')}</th>
+                <th className="px-4 py-3 text-left text-sm font-light">{t('admin_redirect_status')}</th>
+                <th className="px-4 py-3 text-right text-sm font-light">{t('admin_actions')}</th>
               </tr>
             </thead>
             <tbody>
@@ -258,7 +260,7 @@ export default function AdminRedirectsPage() {
                           : 'bg-gray-500/10 text-gray-600 border border-gray-500/20'
                       }`}
                     >
-                      {redirect.status}
+                      {redirect.status === 'active' ? t('admin_redirect_status_active') : t('admin_redirect_status_inactive')}
                     </span>
                   </td>
                   <td className="px-4 py-3 text-sm text-right">
@@ -289,14 +291,14 @@ export default function AdminRedirectsPage() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-card rounded-lg max-w-lg w-full">
             <div className="flex items-center justify-between p-6 border-b border-border">
-              <h2 className="text-xl font-light">Add Redirect</h2>
+              <h2 className="text-xl font-light">{t('admin_create_redirect')}</h2>
               <button onClick={() => setShowCreateModal(false)}>
                 <X className="w-5 h-5" />
               </button>
             </div>
             <form onSubmit={handleCreate} className="p-6 space-y-4">
               <div>
-                <label className="block text-sm font-light mb-2">From Path *</label>
+                <label className="block text-sm font-light mb-2">{t('admin_redirect_from')} *</label>
                 <input
                   type="text"
                   required
@@ -308,7 +310,7 @@ export default function AdminRedirectsPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-light mb-2">To Path *</label>
+                <label className="block text-sm font-light mb-2">{t('admin_redirect_to')} *</label>
                 <input
                   type="text"
                   required
@@ -321,7 +323,7 @@ export default function AdminRedirectsPage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-light mb-2">Type *</label>
+                  <label className="block text-sm font-light mb-2">{t('admin_redirect_type')} *</label>
                   <select
                     value={formData.type}
                     onChange={(e) =>
@@ -329,13 +331,13 @@ export default function AdminRedirectsPage() {
                     }
                     className="w-full px-4 py-2 rounded-md border border-border bg-background"
                   >
-                    <option value="301">301 (Permanent)</option>
-                    <option value="302">302 (Temporary)</option>
+                    <option value="301">{t('admin_redirect_type_301')}</option>
+                    <option value="302">{t('admin_redirect_type_302')}</option>
                   </select>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-light mb-2">Status *</label>
+                  <label className="block text-sm font-light mb-2">{t('admin_redirect_status')} *</label>
                   <select
                     value={formData.status}
                     onChange={(e) =>
@@ -346,8 +348,8 @@ export default function AdminRedirectsPage() {
                     }
                     className="w-full px-4 py-2 rounded-md border border-border bg-background"
                   >
-                    <option value="active">Active</option>
-                    <option value="inactive">Inactive</option>
+                    <option value="active">{t('admin_redirect_status_active')}</option>
+                    <option value="inactive">{t('admin_redirect_status_inactive')}</option>
                   </select>
                 </div>
               </div>
@@ -358,14 +360,14 @@ export default function AdminRedirectsPage() {
                   onClick={() => setShowCreateModal(false)}
                   className="px-6 py-2 border border-border rounded-md text-sm font-light hover:bg-muted/10 transition-colors"
                 >
-                  Cancel
+                  {t('admin_cancel_action')}
                 </button>
                 <button
                   type="submit"
                   disabled={isSaving}
                   className="px-6 py-2 bg-foreground text-background rounded-md text-sm font-light hover:opacity-90 transition-opacity disabled:opacity-50"
                 >
-                  {isSaving ? 'Creating...' : 'Create Redirect'}
+                  {isSaving ? t('admin_creating') : t('admin_create_redirect')}
                 </button>
               </div>
             </form>
@@ -378,14 +380,14 @@ export default function AdminRedirectsPage() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-card rounded-lg max-w-lg w-full">
             <div className="flex items-center justify-between p-6 border-b border-border">
-              <h2 className="text-xl font-light">Edit Redirect</h2>
+              <h2 className="text-xl font-light">{t('admin_edit_redirect')}</h2>
               <button onClick={() => setShowEditModal(false)}>
                 <X className="w-5 h-5" />
               </button>
             </div>
             <form onSubmit={handleUpdate} className="p-6 space-y-4">
               <div>
-                <label className="block text-sm font-light mb-2">From Path *</label>
+                <label className="block text-sm font-light mb-2">{t('admin_redirect_from')} *</label>
                 <input
                   type="text"
                   required
@@ -396,7 +398,7 @@ export default function AdminRedirectsPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-light mb-2">To Path *</label>
+                <label className="block text-sm font-light mb-2">{t('admin_redirect_to')} *</label>
                 <input
                   type="text"
                   required
@@ -408,7 +410,7 @@ export default function AdminRedirectsPage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-light mb-2">Type *</label>
+                  <label className="block text-sm font-light mb-2">{t('admin_redirect_type')} *</label>
                   <select
                     value={formData.type}
                     onChange={(e) =>
@@ -416,13 +418,13 @@ export default function AdminRedirectsPage() {
                     }
                     className="w-full px-4 py-2 rounded-md border border-border bg-background"
                   >
-                    <option value="301">301 (Permanent)</option>
-                    <option value="302">302 (Temporary)</option>
+                    <option value="301">{t('admin_redirect_type_301')}</option>
+                    <option value="302">{t('admin_redirect_type_302')}</option>
                   </select>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-light mb-2">Status *</label>
+                  <label className="block text-sm font-light mb-2">{t('admin_redirect_status')} *</label>
                   <select
                     value={formData.status}
                     onChange={(e) =>
@@ -433,8 +435,8 @@ export default function AdminRedirectsPage() {
                     }
                     className="w-full px-4 py-2 rounded-md border border-border bg-background"
                   >
-                    <option value="active">Active</option>
-                    <option value="inactive">Inactive</option>
+                    <option value="active">{t('admin_redirect_status_active')}</option>
+                    <option value="inactive">{t('admin_redirect_status_inactive')}</option>
                   </select>
                 </div>
               </div>
@@ -445,14 +447,14 @@ export default function AdminRedirectsPage() {
                   onClick={() => setShowEditModal(false)}
                   className="px-6 py-2 border border-border rounded-md text-sm font-light hover:bg-muted/10 transition-colors"
                 >
-                  Cancel
+                  {t('admin_cancel_action')}
                 </button>
                 <button
                   type="submit"
                   disabled={isSaving}
                   className="px-6 py-2 bg-foreground text-background rounded-md text-sm font-light hover:opacity-90 transition-opacity disabled:opacity-50"
                 >
-                  {isSaving ? 'Updating...' : 'Update Redirect'}
+                  {isSaving ? t('admin_saving') : t('admin_edit_redirect')}
                 </button>
               </div>
             </form>
@@ -465,9 +467,9 @@ export default function AdminRedirectsPage() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-card rounded-lg max-w-md w-full">
             <div className="p-6">
-              <h2 className="text-xl font-light mb-4">Delete Redirect</h2>
+              <h2 className="text-xl font-light mb-4">{t('admin_delete_redirect')}</h2>
               <p className="text-muted-foreground mb-2">
-                Are you sure you want to delete this redirect?
+                {t('admin_delete_redirect_confirm')}
               </p>
               <div className="p-3 bg-muted/10 rounded-md border border-border mb-6 font-mono text-sm">
                 <div className="flex items-center gap-2">
@@ -481,14 +483,14 @@ export default function AdminRedirectsPage() {
                   onClick={() => setShowDeleteModal(false)}
                   className="px-6 py-2 border border-border rounded-md text-sm font-light hover:bg-muted/10 transition-colors"
                 >
-                  Cancel
+                  {t('admin_cancel_action')}
                 </button>
                 <button
                   onClick={handleDelete}
                   disabled={isSaving}
                   className="px-6 py-2 bg-red-600 text-white rounded-md text-sm font-light hover:bg-red-700 transition-colors disabled:opacity-50"
                 >
-                  {isSaving ? 'Deleting...' : 'Delete Redirect'}
+                  {isSaving ? t('admin_deleting') : t('admin_delete_redirect')}
                 </button>
               </div>
             </div>
