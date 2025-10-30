@@ -3,6 +3,7 @@
 import { useState, useEffect, use } from 'react'
 import { useRouter } from 'next/navigation'
 import { Post } from '@/types/content'
+import { ImageUpload } from '@/components/image-upload'
 
 export default function EditPostPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params)
@@ -186,14 +187,11 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-black dark:text-white mb-2">
-              Cover Image URL
-            </label>
-            <input
-              type="url"
+            <ImageUpload
+              label="Cover Image"
               value={post.coverImage || ''}
-              onChange={(e) => setPost({ ...post, coverImage: e.target.value })}
-              className="w-full rounded-lg border border-black/10 bg-transparent px-4 py-3 text-black focus:border-black focus:outline-none dark:border-white/10 dark:text-white dark:focus:border-white"
+              onChange={(url) => setPost({ ...post, coverImage: url })}
+              onRemove={() => setPost({ ...post, coverImage: '' })}
             />
           </div>
 

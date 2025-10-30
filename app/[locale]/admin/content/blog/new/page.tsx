@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { ImageUpload } from '@/components/image-upload'
 
 export default function NewPostPage() {
   const router = useRouter()
@@ -188,15 +189,11 @@ export default function NewPostPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-black dark:text-white mb-2">
-              Cover Image URL
-            </label>
-            <input
-              type="url"
+            <ImageUpload
+              label="Cover Image"
               value={formData.coverImage}
-              onChange={(e) => setFormData(prev => ({ ...prev, coverImage: e.target.value }))}
-              className="w-full rounded-lg border border-black/10 bg-transparent px-4 py-3 text-black focus:border-black focus:outline-none dark:border-white/10 dark:text-white dark:focus:border-white"
-              placeholder="https://example.com/image.jpg"
+              onChange={(url) => setFormData(prev => ({ ...prev, coverImage: url }))}
+              onRemove={() => setFormData(prev => ({ ...prev, coverImage: '' }))}
             />
           </div>
 

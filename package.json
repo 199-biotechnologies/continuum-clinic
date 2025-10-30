@@ -20,6 +20,7 @@
     "@radix-ui/react-slot": "1.1.1",
     "@radix-ui/react-tabs": "^1.1.1",
     "@tanstack/react-query": "^5.62.13",
+    "@vercel/blob": "^2.0.0",
     "@vercel/kv": "^3.0.0",
     "bcryptjs": "^2.4.3",
     "class-variance-authority": "^0.7.1",
