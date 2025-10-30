@@ -20,7 +20,7 @@ const ALLOWED_TYPES = [
 export async function POST(request: NextRequest) {
   try {
     // Check admin authentication
-    const adminUser = await requireAdminAuth(request)
+    const adminUser = await requireAdminAuth()
     if (!adminUser) {
       return NextResponse.json(
         { error: 'Unauthorized - Admin access required' },
