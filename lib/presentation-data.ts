@@ -20,13 +20,13 @@ export const presentationSlides: Slide[] = [
     id: 1,
     type: 'title',
     title: 'The Continuum Clinic',
-    subtitle: 'World's First Veterinary Longevity Centre',
+    subtitle: "World's First Veterinary Longevity Centre",
     layout: 'center'
   },
   {
     id: 2,
     type: 'quote',
-    quote: 'We take care of humanity's best companions. Not to ride the wave of longevity — but because we truly care.',
+    quote: "We take care of humanity's best companions. Not to ride the wave of longevity — but because we truly care.",
     author: 'Our Mission'
   },
   {
@@ -220,7 +220,7 @@ export const presentationSlides: Slide[] = [
     title: 'Making PCC1 Accessible',
     content: [
       'Cutting the root cause of disease isn't a luxury',
-      'It's a necessity',
+      "It's a necessity",
       '',
       '**Our Goal**: Bring procyanidin C1 from lab to clinic',
       '— Veterinary-specific formulations',
@@ -308,7 +308,7 @@ export const presentationSlides: Slide[] = [
       '**Year 3**: Gene therapy partnerships, epigenetic pilot programs',
       '**Year 5**: Global network, proprietary diagnostic platform, published outcomes',
       '',
-      'We're not just building a clinic. We're building an industry.'
+      "We're not just building a clinic. We're building an industry."
     ]
   },
 
