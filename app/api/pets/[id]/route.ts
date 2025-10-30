@@ -23,7 +23,7 @@ const petUpdateSchema = z.object({
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const user = await getClientUser()
@@ -35,7 +35,8 @@ export async function GET(
       )
     }
 
-    const pet = await getPet(params.id) as any
+    const { id } = await params
+    const pet = await getPet(id) as any
 
     if (!pet) {
       return NextResponse.json(
@@ -68,7 +69,7 @@ export async function GET(
  */
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const user = await getClientUser()
@@ -80,7 +81,8 @@ export async function PUT(
       )
     }
 
-    const existingPet = await getPet(params.id) as any
+    const { id } = await params
+    const existingPet = await getPet(id) as any
 
     if (!existingPet) {
       return NextResponse.json(
@@ -106,7 +108,7 @@ export async function PUT(
       updatedAt: new Date().toISOString(),
     }
 
-    await setPet(params.id, updatedPet)
+    await setPet(id, updatedPet)
 
     return NextResponse.json({ pet: updatedPet, success: true })
   } catch (error: any) {
