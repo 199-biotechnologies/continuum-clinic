@@ -21,7 +21,7 @@ const clientUpdateSchema = z.object({
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const user = await getClientUser()
@@ -33,15 +33,17 @@ export async function GET(
       )
     }
 
+    const { id } = await params
+
     // Clients can only access their own profile
-    if (params.id !== user.userId) {
+    if (id !== user.userId) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 403 }
       )
     }
 
-    const client = await getClient(params.id)
+    const client = await getClient(id)
 
     if (!client) {
       return NextResponse.json(
@@ -66,7 +68,7 @@ export async function GET(
  */
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const user = await getClientUser()
@@ -78,15 +80,17 @@ export async function PUT(
       )
     }
 
+    const { id } = await params
+
     // Clients can only update their own profile
-    if (params.id !== user.userId) {
+    if (id !== user.userId) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 403 }
       )
     }
 
-    const existingClient = await getClient(params.id) as any
+    const existingClient = await getClient(id) as any
 
     if (!existingClient) {
       return NextResponse.json(
@@ -104,7 +108,7 @@ export async function PUT(
       updatedAt: new Date().toISOString(),
     }
 
-    await setClient(params.id, updatedClient)
+    await setClient(id, updatedClient)
 
     return NextResponse.json({ client: updatedClient, success: true })
   } catch (error: any) {

@@ -89,24 +89,109 @@ export default function AboutPage() {
           </Container>
         </Section>
 
-        {/* Team */}
+        {/* Leadership Team */}
         <Section className="bg-muted/10">
           <Container>
-            <h2 className="mb-12 text-center">{t('about_team_title')}</h2>
-            <div className="max-w-3xl mx-auto space-y-6">
+            <h2 className="mb-6 text-center">{t('about_team_title')}</h2>
+            <p className="text-lg text-center text-muted-foreground mb-12 max-w-3xl mx-auto">
+              {t('about_team_intro')}
+            </p>
+            <div className="max-w-5xl mx-auto space-y-8">
+              {/* Boris Djordjevic */}
               <div className="border rounded-lg p-8 bg-background">
-                <h3 className="mb-2">{t('about_team_member1_name')}</h3>
-                <div className="text-sm text-muted-foreground mb-4">{t('about_team_member1_role')}</div>
+                <div className="flex flex-col md:flex-row md:items-start md:justify-between mb-4">
+                  <div>
+                    <h3 className="mb-2">{t('about_boris_name')}</h3>
+                    <div className="text-sm font-medium text-muted-foreground mb-4">{t('about_boris_role')}</div>
+                  </div>
+                </div>
                 <p className="text-muted-foreground leading-relaxed mb-4">
-                  {t('about_team_member1_bio')}
+                  {t('about_boris_bio')}
                 </p>
-                <div className="text-sm text-muted-foreground">
-                  <div className="font-medium mb-2">{t('about_team_qualifications')}</div>
-                  <ul className="list-disc list-inside space-y-1">
-                    <li>{t('about_team_member1_qual1')}</li>
-                    <li>{t('about_team_member1_qual2')}</li>
-                    <li>{t('about_team_member1_qual3')}</li>
-                  </ul>
+                <div className="grid md:grid-cols-2 gap-6 text-sm text-muted-foreground">
+                  <div>
+                    <div className="font-medium mb-2">{t('about_team_background')}</div>
+                    <ul className="space-y-1">
+                      <li className="flex items-start">
+                        <span className="mr-2">•</span>
+                        <span>{t('about_boris_background1')}</span>
+                      </li>
+                      <li className="flex items-start">
+                        <span className="mr-2">•</span>
+                        <span>{t('about_boris_background2')}</span>
+                      </li>
+                      <li className="flex items-start">
+                        <span className="mr-2">•</span>
+                        <span>{t('about_boris_background3')}</span>
+                      </li>
+                    </ul>
+                  </div>
+                  <div>
+                    <div className="font-medium mb-2">{t('about_team_expertise')}</div>
+                    <ul className="space-y-1">
+                      <li className="flex items-start">
+                        <span className="mr-2">•</span>
+                        <span>{t('about_boris_expertise1')}</span>
+                      </li>
+                      <li className="flex items-start">
+                        <span className="mr-2">•</span>
+                        <span>{t('about_boris_expertise2')}</span>
+                      </li>
+                      <li className="flex items-start">
+                        <span className="mr-2">•</span>
+                        <span>{t('about_boris_expertise3')}</span>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              {/* Dr Avi Roy */}
+              <div className="border rounded-lg p-8 bg-background">
+                <div className="flex flex-col md:flex-row md:items-start md:justify-between mb-4">
+                  <div>
+                    <h3 className="mb-2">{t('about_avi_name')}</h3>
+                    <div className="text-sm font-medium text-muted-foreground mb-4">{t('about_avi_role')}</div>
+                  </div>
+                </div>
+                <p className="text-muted-foreground leading-relaxed mb-4">
+                  {t('about_avi_bio')}
+                </p>
+                <div className="grid md:grid-cols-2 gap-6 text-sm text-muted-foreground">
+                  <div>
+                    <div className="font-medium mb-2">{t('about_team_background')}</div>
+                    <ul className="space-y-1">
+                      <li className="flex items-start">
+                        <span className="mr-2">•</span>
+                        <span>{t('about_avi_background1')}</span>
+                      </li>
+                      <li className="flex items-start">
+                        <span className="mr-2">•</span>
+                        <span>{t('about_avi_background2')}</span>
+                      </li>
+                      <li className="flex items-start">
+                        <span className="mr-2">•</span>
+                        <span>{t('about_avi_background3')}</span>
+                      </li>
+                    </ul>
+                  </div>
+                  <div>
+                    <div className="font-medium mb-2">{t('about_team_expertise')}</div>
+                    <ul className="space-y-1">
+                      <li className="flex items-start">
+                        <span className="mr-2">•</span>
+                        <span>{t('about_avi_expertise1')}</span>
+                      </li>
+                      <li className="flex items-start">
+                        <span className="mr-2">•</span>
+                        <span>{t('about_avi_expertise2')}</span>
+                      </li>
+                      <li className="flex items-start">
+                        <span className="mr-2">•</span>
+                        <span>{t('about_avi_expertise3')}</span>
+                      </li>
+                    </ul>
+                  </div>
                 </div>
               </div>
             </div>

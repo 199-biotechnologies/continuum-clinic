@@ -61,13 +61,6 @@ export function Header() {
                 <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full opacity-0 transition-smooth group-hover:opacity-100 bg-gray-900 dark:bg-gray-100" />
               </Link>
               <Link
-                href="/services"
-                className="text-xs font-light tracking-[0.1em] uppercase transition-all duration-300 relative group whitespace-nowrap text-gray-900 dark:text-gray-100 hover:text-gray-700 dark:hover:text-gray-300"
-              >
-                {t('nav_services')}
-                <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full opacity-0 transition-smooth group-hover:opacity-100 bg-gray-900 dark:bg-gray-100" />
-              </Link>
-              <Link
                 href="/contact"
                 className="text-xs font-light tracking-[0.1em] uppercase transition-all duration-300 relative group whitespace-nowrap text-gray-900 dark:text-gray-100 hover:text-gray-700 dark:hover:text-gray-300"
               >
@@ -149,13 +142,6 @@ export function Header() {
               className="text-xl font-light tracking-[0.1em] uppercase transition-all duration-300 text-gray-900 dark:text-gray-100 hover:text-gray-700 dark:hover:text-gray-300"
             >
               {t('nav_science')}
-            </Link>
-            <Link
-              href="/services"
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="text-xl font-light tracking-[0.1em] uppercase transition-all duration-300 text-gray-900 dark:text-gray-100 hover:text-gray-700 dark:hover:text-gray-300"
-            >
-              {t('nav_services')}
             </Link>
             <Link
               href="/contact"
