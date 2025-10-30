@@ -1,6 +1,7 @@
 import { kv } from '@vercel/kv'
 import type { Post } from '@/types/content'
 import type { ContactFormSubmission } from '@/types/communications'
+import type { Client } from '@/types/client'
 
 /**
  * Redis KV Client
@@ -72,8 +73,8 @@ export async function setAdminPasswordHash(adminId: string, passwordHash: string
 /**
  * Client management
  */
-export async function getClient(clientId: string) {
-  const data = await redis.get(`client:${clientId}`)
+export async function getClient(clientId: string): Promise<Client | null> {
+  const data = await redis.get<Client>(`client:${clientId}`)
   return data || null
 }
 
