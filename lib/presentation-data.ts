@@ -78,7 +78,7 @@ export const presentationSlides: Slide[] = [
     id: 7,
     type: 'title',
     title: 'The Clinic',
-    subtitle: 'Building the World's First Veterinary Longevity Centre',
+    subtitle: "Building the World's First Veterinary Longevity Centre",
     layout: 'center'
   },
   {
@@ -160,13 +160,13 @@ export const presentationSlides: Slide[] = [
   {
     id: 13,
     type: 'quote',
-    quote: 'We don't just treat disease. We track, measure, and prove efficacy. 100% evidence-based. Zero speculation.',
+    quote: "We don't just treat disease. We track, measure, and prove efficacy. 100% evidence-based. Zero speculation.",
     author: 'The Continuum Standard'
   },
   {
     id: 14,
     type: 'content',
-    title: 'Why We're Different',
+    title: "Why We're Different",
     content: [
       '**Transparency**: Every protocol explained at a level no science can dispute',
       '**Measurement**: Biomarker tracking before, during, after — always',
@@ -190,7 +190,7 @@ export const presentationSlides: Slide[] = [
     type: 'content',
     title: 'Why Research Matters',
     content: [
-      'We don't wait for academia to validate',
+      "We don't wait for academia to validate",
       'We are practical. We are fast.',
       'What we care about: **extending youth for those we love most**',
       '',
@@ -219,7 +219,7 @@ export const presentationSlides: Slide[] = [
     type: 'content',
     title: 'Making PCC1 Accessible',
     content: [
-      'Cutting the root cause of disease isn't a luxury',
+      "Cutting the root cause of disease isn't a luxury",
       "It's a necessity",
       '',
       '**Our Goal**: Bring procyanidin C1 from lab to clinic',
@@ -276,7 +276,7 @@ export const presentationSlides: Slide[] = [
       '— Cancer reprogramming (E-ON-001 for glioblastoma)',
       '— Transcription factor therapies for cancer',
       '',
-      'We don't just slow aging. We reverse epigenetic damage.'
+      "We don't just slow aging. We reverse epigenetic damage."
     ]
   },
   {
@@ -295,7 +295,7 @@ export const presentationSlides: Slide[] = [
   {
     id: 23,
     type: 'quote',
-    quote: 'From repurposing drugs to gene therapies to epigenetic reprogramming — we are at the cutting edge. Not because it's trendy. Because it works.',
+    quote: "From repurposing drugs to gene therapies to epigenetic reprogramming — we are at the cutting edge. Not because it's trendy. Because it works.",
     author: 'Our Commitment'
   },
   {
