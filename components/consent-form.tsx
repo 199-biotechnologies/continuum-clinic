@@ -307,7 +307,7 @@ function formatMarkdown(markdown: string): string {
   html = html.replace(/^\d+\. (.*$)/gim, '<li>$1</li>')
 
   // Wrap consecutive <li> in <ul>
-  html = html.replace(/(<li>.*<\/li>)/gis, '<ul>$1</ul>')
+  html = html.replace(/(<li>[\s\S]*?<\/li>)/gi, '<ul>$1</ul>')
 
   // Paragraphs
   html = html.replace(/\n\n/g, '</p><p>')
