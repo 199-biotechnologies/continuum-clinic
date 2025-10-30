@@ -194,7 +194,7 @@ export const presentationSlides: Slide[] = [
       'We are practical. We are fast.',
       'What we care about: **extending youth for those we love most**',
       '',
-      'Our research arm exists to bring Nature's most potent therapies to your pet — not in 10 years, but now.'
+      "Our research arm exists to bring Nature's most potent therapies to your pet — not in 10 years, but now."
     ]
   },
 
@@ -202,7 +202,7 @@ export const presentationSlides: Slide[] = [
   {
     id: 17,
     type: 'content',
-    title: 'Procyanidin C1: Nature's Senolytic',
+    title: "Procyanidin C1: Nature's Senolytic",
     content: [
       '**Published in Nature Metabolism (2021)**',
       '— 10% lifespan extension in aged mice',
@@ -269,7 +269,7 @@ export const presentationSlides: Slide[] = [
     type: 'content',
     title: 'Epigenetic Reprogramming: The Future',
     content: [
-      '**The Insight**: Cells aren't broken. They're locked in the wrong program.',
+      "**The Insight**: Cells aren't broken. They're locked in the wrong program.",
       '',
       '**199 Biotechnologies Research**:',
       '— Partial reprogramming (Yamanaka factors, controlled)',
